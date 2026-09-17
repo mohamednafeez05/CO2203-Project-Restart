@@ -11,9 +11,11 @@ private:
     std::vector<const TimeSlot*> timeSlots;
 
 public:
-    Timetable() = default;
+    Timetable();
 
-    void addTimeSlot(const TimeSlot* slot);
+    void addTimeSlot(const TimeSlot& slot);
+
+    void removeTimeSlot(const TimeSlot& slot);
 
     bool hasClashWith(const TimeSlot& other) const;
 

@@ -21,10 +21,13 @@ private:
 public:
     static const int defaultDurationSeconds = 600;
 
+    AttendanceSession();
+
     AttendanceSession(
-        const std::string& id,
-        const TimeSlot* slot,
-        int duration = defaultDurationSeconds
+        std::string sessionId,
+        const TimeSlot* timeSlot,
+        int durationSeconds =
+            defaultDurationSeconds
     );
 
     void open();
@@ -33,9 +36,13 @@ public:
 
     bool isOpen() const;
 
-    std::string getId() const;
+    std::string getSessionId() const;
 
     const TimeSlot* getTimeSlot() const;
+
+    std::time_t getStartTime() const;
+
+    std::time_t getExpiryTime() const;
 };
 
 #endif
