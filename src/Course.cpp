@@ -1,5 +1,6 @@
 #include "Course.h"
 
+
 bool Course::isFull()
 {
     return enrolledStudents.size() >= capacity;
@@ -17,6 +18,12 @@ void Course::addStudent(Student& student)
 
 void Course::removeStudent(Student& student)
 {   
+    auto it = std::find(enrolledStudents.begin(), enrolledStudents.end(), &student);
+
+    if (it != enrolledStudents.end())
+    {
+        enrolledStudents.erase(it);
+    }
 }
 
 double Course::calculateFinalGrade()
@@ -36,7 +43,7 @@ std::ostream& operator<<(std::ostream& os, Course& c)
 
     return os;
 }
-
+std::vector<Student*> enrolledStudents;
 Course::~Course()
 {
 }

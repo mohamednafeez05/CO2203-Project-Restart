@@ -14,6 +14,7 @@ private:
 public:
     bool login(std::string password);
     void displayMenu();
+    std::string getId() const;
 
     friend std::ostream& operator<<(std::ostream& os, Person& p);
 

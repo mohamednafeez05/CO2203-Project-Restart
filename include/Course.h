@@ -30,6 +30,7 @@ public:
     void addStudent(Student& student);
     void removeStudent(Student& student);
     virtual double calculateFinalGrade();
+    bool isStudentEnrolled(const Student& student) const;
 
     friend std::ostream& operator<<(std::ostream& os, Course& c);
 

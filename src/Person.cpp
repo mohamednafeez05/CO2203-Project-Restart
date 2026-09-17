@@ -10,9 +10,12 @@ void Person::displayMenu()
     std::cout << "Person menu" << std::endl;
 }
 
-Person::~Person()
+std::string Person::getId() const
 {
+    return personId;
 }
+
+
 
 std::ostream& operator<<(std::ostream& os, Person& p)
 {
@@ -20,4 +23,7 @@ std::ostream& operator<<(std::ostream& os, Person& p)
     os << "Name: " << p.name << std::endl;
 
     return os;
+}
+Person::~Person()
+{
 }
