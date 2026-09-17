@@ -5,6 +5,7 @@
 #include <vector>
 #include "Student.h"
 #include "AttendanceRecord.h"
+#include "CorrectionRecord.h"
 
 class FileStorage
 {
@@ -24,6 +25,14 @@ public:
     // Restores attendance records after validation.
     static void loadAll(std::vector<AttendanceRecord>& records,
                         const std::string& filename);
-};
+
+    // Saves the correction history.
+    static void saveAll(const std::vector<CorrectionRecord>& corrections,
+                        const std::string& filename);
+
+    // Restores the correction history after validation.
+    static void loadAll(std::vector<CorrectionRecord>& corrections,
+                        const std::string& filename);
+    };
 
 #endif

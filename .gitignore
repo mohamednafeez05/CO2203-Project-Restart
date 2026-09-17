@@ -72,3 +72,5 @@ Testing/
 !/Makefile
 /data/students_test.txt
 /data/attendance_test.txt
+/data/persistence_test/
+/persistenceTests.exe

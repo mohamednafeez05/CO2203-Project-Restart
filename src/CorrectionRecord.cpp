@@ -39,3 +39,15 @@ std::time_t CorrectionRecord::getCorrectionTime() const
 {
     return correctionTime;
 }
+
+// Restores the original correction time.
+CorrectionRecord::CorrectionRecord(std::string studentId,
+                                   std::string sessionId,
+                                   std::string reason,
+                                   std::time_t recordedTime)
+    : studentId(studentId),
+      sessionId(sessionId),
+      reason(reason),
+      correctionTime(recordedTime)
+{
+}

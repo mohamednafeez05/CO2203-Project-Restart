@@ -26,6 +26,14 @@ private:
 public:
     AttendanceRegister();
 
+    // Saves both collections to separate files.
+    void save(const std::string& attendanceFile,
+            const std::string& correctionFile) const;
+
+    // Loads both collections together.
+    void load(const std::string& attendanceFile,
+            const std::string& correctionFile);
+
     void markPresent(
         Student& student,
         Course& course,

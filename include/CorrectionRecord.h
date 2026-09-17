@@ -20,6 +20,11 @@ public:
         std::string sessionId,
         std::string reason
     );
+    // Restores a correction with its original timestamp.
+    CorrectionRecord(std::string studentId,
+                    std::string sessionId,
+                    std::string reason,
+                    std::time_t recordedTime);
 
     std::string getStudentId() const;
 

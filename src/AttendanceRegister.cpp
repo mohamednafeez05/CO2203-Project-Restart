@@ -2,8 +2,8 @@
 
 #include "Student.h"
 #include "Course.h"
-
 #include <stdexcept>
+#include "FileStorage.h"
 
 AttendanceRegister::AttendanceRegister()
 {
@@ -122,4 +122,38 @@ const std::vector<CorrectionRecord>&
 AttendanceRegister::getCorrections() const
 {
     return corrections;
+}
+
+// Writes both attendance collections.
+void AttendanceRegister::save(const std::string& attendanceFile,
+                              const std::string& correctionFile) const
+{
+    if (attendanceFile == correctionFile)
+    {
+        throw std::invalid_argument(
+            "Use different attendance and correction files.");
+    }
+
+    FileStorage::saveAll(records, attendanceFile);
+    FileStorage::saveAll(corrections, correctionFile);
+}
+
+// Replaces both collections only after both files pass.
+void AttendanceRegister::load(const std::string& attendanceFile,
+                              const std::string& correctionFile)
+{
+    if (attendanceFile == correctionFile)
+    {
+        throw std::invalid_argument(
+            "Use different attendance and correction files.");
+    }
+
+    std::vector<AttendanceRecord> loadedRecords;
+    std::vector<CorrectionRecord> loadedCorrections;
+
+    FileStorage::loadAll(loadedRecords, attendanceFile);
+    FileStorage::loadAll(loadedCorrections, correctionFile);
+
+    records.swap(loadedRecords);
+    corrections.swap(loadedCorrections);
 }

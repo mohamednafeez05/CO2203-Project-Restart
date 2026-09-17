@@ -221,3 +221,105 @@ void FileStorage::loadAll(std::vector<AttendanceRecord>& records,
 
     records.swap(loaded);
 }
+
+// Preserves every correction in its original order.
+void FileStorage::saveAll(const std::vector<CorrectionRecord>& corrections,
+                          const std::string& filename)
+{
+    std::ostringstream content;
+    content << "CORRECTIONS_V1\n";
+
+    for (const CorrectionRecord& correction : corrections)
+    {
+        const std::string fields[] = {
+            correction.getStudentId(),
+            correction.getSessionId(),
+            correction.getReason()
+        };
+
+        for (const std::string& field : fields)
+        {
+            if (field.find_first_not_of(" \t\r\n") == std::string::npos ||
+                field.find_first_of("\r\n") != std::string::npos)
+            {
+                throw std::runtime_error("Invalid correction text field.");
+            }
+        }
+
+        if (correction.getCorrectionTime() <= 0)
+            throw std::runtime_error("Invalid correction timestamp.");
+
+        content << std::quoted(fields[0]) << ' '
+                << std::quoted(fields[1]) << ' '
+                << std::quoted(fields[2]) << ' '
+                << correction.getCorrectionTime() << '\n';
+    }
+
+    std::ofstream output(filename);
+    if (!output)
+        throw std::runtime_error("Cannot open file for saving: " + filename);
+
+    output << content.str();
+    output.close();
+
+    if (!output)
+        throw std::runtime_error("Failed to finish saving: " + filename);
+}
+
+// Keeps existing corrections if any file row is invalid.
+void FileStorage::loadAll(std::vector<CorrectionRecord>& corrections,
+                          const std::string& filename)
+{
+    std::ifstream input(filename);
+    if (!input)
+        throw std::runtime_error("Cannot open file for loading: " + filename);
+
+    std::string line;
+    if (!std::getline(input, line) || line != "CORRECTIONS_V1")
+        throw std::runtime_error("Invalid correction file header.");
+
+    std::vector<CorrectionRecord> loaded;
+    int lineNumber = 1;
+
+    while (std::getline(input, line))
+    {
+        ++lineNumber;
+        std::istringstream row(line);
+        std::string student, session, reason;
+        std::time_t recordedTime;
+
+        if (!(row >> std::quoted(student)
+                  >> std::quoted(session)
+                  >> std::quoted(reason)
+                  >> recordedTime))
+        {
+            throw std::runtime_error("Malformed correction at line " +
+                                     std::to_string(lineNumber));
+        }
+
+        row >> std::ws;
+
+        if (!row.eof() || recordedTime <= 0)
+        {
+            throw std::runtime_error("Invalid correction at line " +
+                                     std::to_string(lineNumber));
+        }
+
+        for (const std::string& field : {student, session, reason})
+        {
+            if (field.find_first_not_of(" \t\r\n") == std::string::npos ||
+                field.find_first_of("\r\n") != std::string::npos)
+            {
+                throw std::runtime_error("Invalid correction text at line " +
+                                         std::to_string(lineNumber));
+            }
+        }
+
+        loaded.emplace_back(student, session, reason, recordedTime);
+    }
+
+    if (input.bad() || !input.eof())
+        throw std::runtime_error("Failed to finish reading: " + filename);
+
+    corrections.swap(loaded);
+}
