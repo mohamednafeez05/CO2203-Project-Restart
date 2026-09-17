@@ -24,12 +24,19 @@ private:
     std::vector<TimeSlot> slots;
 
 public:
+    // Initialises course details and capacity.
+    Course(const std::string& code, const std::string& title,
+        int credits, int capacity);
+        
     bool isFull();
     bool prerequisitesMet(Student& student);
     const std::vector<TimeSlot>& getSlots() const;
     void addStudent(Student& student);
     void removeStudent(Student& student);
-   
+
+    // Checks whether the student is enrolled.
+    bool isStudentEnrolled(const Student& student) const;
+
     // Requires each course type to provide its grading rule.
     virtual double calculateFinalGrade() = 0;
 

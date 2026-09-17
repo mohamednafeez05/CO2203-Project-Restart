@@ -12,6 +12,10 @@ private:
     std::string passwordHash;
 
 public:
+    // Initialises identity and the stored credential.
+    Person(const std::string& id, const std::string& name,
+        const std::string& storedHash);
+
     bool login(std::string password);
 
     // Requires each role to provide its menu.
@@ -29,6 +33,7 @@ public:
 
     // Returns the stored credential value for saving.
     std::string getPasswordHash() const;
+
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Repository.h"
+#include "Student.h"
 
 using namespace std;
 
@@ -34,5 +35,17 @@ int main() {
         cout << course << '\n';
     }
 
+    // Checks student construction and inherited getters.
+    Student student("S001", "Nafeez", "TEST_HASH_ONLY",
+                    2, "Computer Engineering");
+
+    cout << "Student: " << student.getPersonId()
+         << " | " << student.getName()
+         << " | Year " << student.getYearOfStudy()
+         << " | " << student.getMajor() << '\n';
+
+    cout << "Enrolled courses: "
+         << student.getEnrolledCourses().size() << '\n';
+         
     return 0;
 }

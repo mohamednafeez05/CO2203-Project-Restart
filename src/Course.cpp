@@ -1,8 +1,10 @@
 #include "Course.h"
+#include <stdexcept>
 
 bool Course::isFull()
 {
-    return enrolledStudents.size() >= capacity;
+    return capacity <= 0 ||
+           enrolledStudents.size() >= static_cast<std::size_t>(capacity);
 }
 
 const std::vector<TimeSlot>& Course::getSlots() const
@@ -69,4 +71,30 @@ const std::vector<Course*>& Course::getPrerequisites() const
 const std::vector<Student*>& Course::getEnrolledStudents() const
 {
     return enrolledStudents;
+}
+
+// Checks the enrolled student references.
+bool Course::isStudentEnrolled(const Student& student) const
+{
+    for (const Student* enrolled : enrolledStudents)
+    {
+        if (enrolled == &student)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Initialises and validates course details.
+Course::Course(const std::string& code, const std::string& title,
+               int credits, int capacity)
+    : courseCode(code), title(title), creditValue(credits),
+      capacity(capacity), lecturer(nullptr)
+{
+    if (code.empty() || title.empty() || credits <= 0 || capacity <= 0)
+    {
+        throw std::invalid_argument("Course details are invalid.");
+    }
 }

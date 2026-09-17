@@ -2,6 +2,11 @@
 
 using namespace std;
 
+// Initialises an empty slot.
+TimeSlot::TimeSlot() : startTime(0), endTime(0)
+{
+}
+
 TimeSlot::TimeSlot(const string& day,
                    int startTime,
                    int endTime,
