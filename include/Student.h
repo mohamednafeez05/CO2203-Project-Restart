@@ -20,6 +20,15 @@ public:
     void drop(Course& course);
     void viewTimetable();
     void displayMenu();
+
+    // Returns the student's year.
+    int getYearOfStudy() const;
+
+    // Returns the student's major.
+    std::string getMajor() const;
+
+    // Returns the enrolled course references.
+    const std::vector<Course*>& getEnrolledCourses() const;
 };
 
 #endif

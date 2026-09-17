@@ -13,11 +13,22 @@ private:
 
 public:
     bool login(std::string password);
-    void displayMenu();
+
+    // Requires each role to provide its menu.
+    virtual void displayMenu() = 0;
 
     friend std::ostream& operator<<(std::ostream& os, Person& p);
 
     virtual ~Person();
+
+    // Returns the person's identifier.
+    std::string getPersonId() const;
+
+    // Returns the person's name.
+    std::string getName() const;
+
+    // Returns the stored credential value for saving.
+    std::string getPasswordHash() const;
 };
 
 #endif

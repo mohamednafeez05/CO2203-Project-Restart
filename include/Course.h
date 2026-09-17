@@ -25,15 +25,38 @@ private:
 
 public:
     bool isFull();
-    bool checkPrerequisitesMet(Student& student);
+    bool prerequisitesMet(Student& student);
     const std::vector<TimeSlot>& getSlots() const;
     void addStudent(Student& student);
     void removeStudent(Student& student);
-    virtual double calculateFinalGrade();
+   
+    // Requires each course type to provide its grading rule.
+    virtual double calculateFinalGrade() = 0;
 
     friend std::ostream& operator<<(std::ostream& os, Course& c);
 
     virtual ~Course();
+
+    // Returns the course identifier.
+    std::string getCourseCode() const;
+
+    // Returns the course title.
+    std::string getTitle() const;
+
+    // Returns the credit value.
+    int getCreditValue() const;
+
+    // Returns the enrolment limit.
+    int getCapacity() const;
+
+    // Returns the assigned lecturer.
+    Lecturer* getLecturer() const;
+
+    // Returns the prerequisite course references.
+    const std::vector<Course*>& getPrerequisites() const;
+
+    // Returns the enrolled student references.
+    const std::vector<Student*>& getEnrolledStudents() const;
 };
 
 #endif

@@ -5,10 +5,6 @@ bool Person::login(std::string password)
     return password == passwordHash;
 }
 
-void Person::displayMenu()
-{
-    std::cout << "Person menu" << std::endl;
-}
 
 Person::~Person()
 {
@@ -20,4 +16,19 @@ std::ostream& operator<<(std::ostream& os, Person& p)
     os << "Name: " << p.name << std::endl;
 
     return os;
+}
+
+std::string Person::getPersonId() const
+{
+    return personId;
+}
+
+std::string Person::getName() const
+{
+    return name;
+}
+
+std::string Person::getPasswordHash() const
+{
+    return passwordHash;
 }
