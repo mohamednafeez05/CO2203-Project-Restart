@@ -71,3 +71,4 @@ Testing/
 # Track the project's build instructions.
 !/Makefile
 /data/students_test.txt
+/data/attendance_test.txt

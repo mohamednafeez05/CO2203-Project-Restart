@@ -4,6 +4,8 @@
 #include "Repository.h"
 #include "Student.h"
 #include "ConsoleInput.h"
+#include "AttendanceRecord.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -101,5 +103,43 @@ int main() {
         return 1;
     }
 
+    // Checks attendance persistence and timestamp preservation.
+    try
+    {
+        Repository<AttendanceRecord> attendance("data/attendance_test.txt");
+
+        AttendanceRecord first("S001", "SESSION01", 1700000000);
+        AttendanceRecord second("S002", "SESSION01", 1700000060);
+
+        attendance.add(first);
+        attendance.add(second);
+        attendance.save();
+
+        Repository<AttendanceRecord> restored("data/attendance_test.txt");
+        restored.load();
+        restored.load();
+
+        const auto& records = restored.getAll();
+
+        if (records.size() != 2 ||
+            records[0].getStudentId() != "S001" ||
+            records[0].getSessionId() != "SESSION01" ||
+            records[0].getCheckInTime() != 1700000000 ||
+            records[1].getStudentId() != "S002" ||
+            records[1].getSessionId() != "SESSION01" ||
+            records[1].getCheckInTime() != 1700000060)
+        {
+            throw std::runtime_error("Attendance round-trip test failed.");
+        }
+
+        std::cout << "Attendance loaded: " << records.size() << '\n';
+        std::cout << "Original timestamps preserved.\n";
+        std::cout << "Repeated load: no duplicate records.\n";
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << "Attendance storage error: " << error.what() << '\n';
+        return 1;
+    }
     return 0;
 }

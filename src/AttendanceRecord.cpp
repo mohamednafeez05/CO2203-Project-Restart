@@ -31,3 +31,13 @@ std::time_t AttendanceRecord::getCheckInTime() const
 {
     return checkInTime;
 }
+
+// Creates a record using its saved timestamp.
+AttendanceRecord::AttendanceRecord(std::string studentId,
+                                   std::string sessionId,
+                                   std::time_t recordedTime)
+    : studentId(studentId),
+      sessionId(sessionId),
+      checkInTime(recordedTime)
+{
+}

@@ -18,7 +18,11 @@ public:
         std::string studentId,
         std::string sessionId
     );
-
+    // Restores the original check-in time.
+    AttendanceRecord(std::string studentId,
+                    std::string sessionId,
+                    std::time_t recordedTime);
+                    
     std::string getStudentId() const;
 
     std::string getSessionId() const;
