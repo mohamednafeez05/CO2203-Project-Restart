@@ -23,7 +23,9 @@ public:
     void enrol(Course& course);
     void drop(Course& course);
     void viewTimetable();
-    void displayMenu();
+
+    // Displays the student menu.
+    void displayMenu() override;
 
     // Returns the student's year.
     int getYearOfStudy() const;

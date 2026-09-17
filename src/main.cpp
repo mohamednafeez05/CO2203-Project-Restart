@@ -89,22 +89,17 @@ int main() {
         return 1;
     }
 
-    // Checks reusable console input validation.
+    // Checks menu dispatch through the base class.
     try
     {
-        int choice = ConsoleInput::readInt(
-            "Enter a test menu choice (1-4): ", 1, 4);
-
-        std::string name = ConsoleInput::readText(
-            "Enter a test name: ");
-
-        cout << "Accepted choice: " << choice << '\n';
-        cout << "Accepted name: " << name << '\n';
+        Person& currentUser = student;
+        currentUser.displayMenu();
     }
     catch (const std::exception& error)
     {
-        cerr << "Input error: " << error.what() << '\n';
+        cerr << "Menu error: " << error.what() << '\n';
         return 1;
     }
+
     return 0;
 }

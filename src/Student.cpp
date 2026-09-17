@@ -1,8 +1,57 @@
 #include "Student.h"
 #include <stdexcept>
+#include "Course.h"
+#include "ConsoleInput.h"
 
+// Displays the student's available actions.
 void Student::displayMenu()
 {
+    while (true)
+    {
+        std::cout << "\nStudent Menu\n"
+                  << "1. View profile\n"
+                  << "2. View enrolled courses\n"
+                  << "3. View timetable\n"
+                  << "0. Return\n";
+
+        int choice = ConsoleInput::readInt("Choice: ", 0, 3);
+
+        switch (choice)
+        {
+        case 1:
+            std::cout << "\nID: " << getPersonId()
+                      << "\nName: " << getName()
+                      << "\nYear: " << yearOfStudy
+                      << "\nMajor: " << major << '\n';
+            break;
+
+        case 2:
+            if (enrolledCourses.empty())
+            {
+                std::cout << "No enrolled courses.\n";
+            }
+            else
+            {
+                for (const Course* course : enrolledCourses)
+                {
+                    if (course != nullptr)
+                    {
+                        std::cout << course->getCourseCode()
+                                  << " | " << course->getTitle()
+                                  << '\n';
+                    }
+                }
+            }
+            break;
+
+        case 3:
+            viewTimetable();
+            break;
+
+        case 0:
+            return;
+        }
+    }
 }
 
 void Student::viewTimetable()
