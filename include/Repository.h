@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "FileStorage.h"
 
 template <typename T>
 class Repository {
@@ -23,7 +24,18 @@ public:
     std::vector<T>& getAll() {
         return items;
     }
+    
+    // Saves the collection using FileStorage.
+    void save()
+    {
+        FileStorage::saveAll(items, filename);
+    }
 
+    // Loads a validated collection using FileStorage.
+    void load()
+    {
+        FileStorage::loadAll(items, filename);
+    }
 };
 
 #endif
