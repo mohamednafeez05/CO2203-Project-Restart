@@ -74,3 +74,6 @@ Testing/
 /data/attendance_test.txt
 /data/persistence_test/
 /persistenceTests.exe
+/data/console_test/
+/data/attendance.txt
+/data/corrections.txt

@@ -15,3 +15,13 @@
 - Reason: preserve the audit history across program restarts.
 - Proposed by: Member 3.
 - Approved by: Member 2 and 1
+
+### Attendance history console
+
+- Added AttendanceConsole to load, display, filter and save history.
+- Added an optional command-line data-directory argument for isolated tests.
+- Startup stops if one data file is missing or either file is invalid.
+- Moved the earlier main demonstrations into tests/LegacySmokeTest.cpp.
+- Authentication and role-menu integration remain pending.
+- Proposed by: Mohamed Nafeez, Member 3.
+- Approved by: Member 2 and 1
