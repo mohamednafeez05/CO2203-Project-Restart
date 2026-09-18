@@ -77,3 +77,7 @@ Testing/
 /data/console_test/
 /data/attendance.txt
 /data/corrections.txt
+/data/safe_save_test/
+/safeSaveTests.exe
+/data/**/*.bak
+/data/**/*.tmp

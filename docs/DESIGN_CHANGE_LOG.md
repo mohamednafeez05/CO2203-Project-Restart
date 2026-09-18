@@ -25,3 +25,14 @@
 - Authentication and role-menu integration remain pending.
 - Proposed by: Mohamed Nafeez, Member 3.
 - Approved by: Member 2 and 1
+
+### Safer file saving
+
+- Added SafeFile to stage writes and retain previous-file backups.
+- Split FileStorage encoding from disk writing.
+- AttendanceRegister submits both collections in one save attempt.
+- Replacement errors trigger an attempt to restore previous files.
+- AttendanceConsole rejects leftover temporary files on startup.
+- Scope: one running application; no power-loss durability guarantee.
+- Proposed by: Mohamed Nafeez, Member 3.
+- Approved by: Member 2 and 1

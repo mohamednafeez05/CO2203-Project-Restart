@@ -33,6 +33,15 @@ public:
     // Restores the correction history after validation.
     static void loadAll(std::vector<CorrectionRecord>& corrections,
                         const std::string& filename);
+
+    // Validates objects and converts them into file text.
+    static std::string encode(const std::vector<Student>& students);
+
+    static std::string encode(
+        const std::vector<AttendanceRecord>& records);
+
+    static std::string encode(
+        const std::vector<CorrectionRecord>& corrections);
     };
 
 #endif

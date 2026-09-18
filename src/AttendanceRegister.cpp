@@ -1,9 +1,9 @@
 #include "AttendanceRegister.h"
-
 #include "Student.h"
 #include "Course.h"
 #include <stdexcept>
 #include "FileStorage.h"
+#include "SafeFile.h"
 
 AttendanceRegister::AttendanceRegister()
 {
@@ -124,9 +124,10 @@ AttendanceRegister::getCorrections() const
     return corrections;
 }
 
-// Writes both attendance collections.
-void AttendanceRegister::save(const std::string& attendanceFile,
-                              const std::string& correctionFile) const
+// Prepares both collections before starting the save.
+void AttendanceRegister::save(
+    const std::string& attendanceFile,
+    const std::string& correctionFile) const
 {
     if (attendanceFile == correctionFile)
     {
@@ -134,8 +135,10 @@ void AttendanceRegister::save(const std::string& attendanceFile,
             "Use different attendance and correction files.");
     }
 
-    FileStorage::saveAll(records, attendanceFile);
-    FileStorage::saveAll(corrections, correctionFile);
+    SafeFile::writeAll({
+        {attendanceFile, FileStorage::encode(records)},
+        {correctionFile, FileStorage::encode(corrections)}
+    });
 }
 
 // Replaces both collections only after both files pass.

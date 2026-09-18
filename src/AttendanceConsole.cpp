@@ -34,11 +34,30 @@ AttendanceConsole::AttendanceConsole(const std::string& directory)
     attendanceFile = (folder / "attendance.txt").string();
     correctionFile = (folder / "corrections.txt").string();
 
+    // Stop if a previous save left temporary files behind.
+    if (std::filesystem::exists(attendanceFile + ".tmp") ||
+        std::filesystem::exists(correctionFile + ".tmp"))
+    {
+        throw std::runtime_error(
+            "An unfinished save exists. Inspect the .tmp and .bak "
+            "files before starting.");
+    }
+
     const bool hasAttendance =
         std::filesystem::exists(attendanceFile);
 
     const bool hasCorrections =
         std::filesystem::exists(correctionFile);
+
+    // Missing originals with backups are not a fresh installation.
+    if (!hasAttendance && !hasCorrections &&
+        (std::filesystem::exists(attendanceFile + ".bak") ||
+         std::filesystem::exists(correctionFile + ".bak")))
+    {
+        throw std::runtime_error(
+            "Saved files are missing but backups exist. "
+            "Recover the saved files before starting.");
+    }
 
     if (hasAttendance != hasCorrections)
     {

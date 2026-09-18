@@ -1,3 +1,4 @@
+#include "SafeFile.h"
 #include "FileStorage.h"
 #include <fstream>
 #include <sstream>
@@ -7,8 +8,8 @@
 #include <utility>
 
 // Validates and writes student records.
-void FileStorage::saveAll(const std::vector<Student>& students,
-                          const std::string& filename)
+std::string FileStorage::encode(
+    const std::vector<Student>& students)
 {
     std::ostringstream content;
     std::set<std::string> ids;
@@ -49,22 +50,7 @@ void FileStorage::saveAll(const std::vector<Student>& students,
                 << std::quoted(fields[3]) << '\n';
     }
 
-    std::ofstream output(filename);
-
-    if (!output)
-    {
-        throw std::runtime_error(
-            "Cannot open file for saving: " + filename);
-    }
-
-    output << content.str();
-    output.close();
-
-    if (!output)
-    {
-        throw std::runtime_error(
-            "Failed to finish saving: " + filename);
-    }
+    return content.str();
 }
 
 // Parses all records before replacing the collection.
@@ -132,8 +118,8 @@ void FileStorage::loadAll(std::vector<Student>& students,
 }
 
 // Validates records before opening the output file.
-void FileStorage::saveAll(const std::vector<AttendanceRecord>& records,
-                          const std::string& filename)
+std::string FileStorage::encode(
+    const std::vector<AttendanceRecord>& records)
 {
     std::ostringstream content;
     std::set<std::pair<std::string, std::string>> keys;
@@ -159,15 +145,7 @@ void FileStorage::saveAll(const std::vector<AttendanceRecord>& records,
                 << record.getCheckInTime() << '\n';
     }
 
-    std::ofstream output(filename);
-    if (!output)
-        throw std::runtime_error("Cannot open file for saving: " + filename);
-
-    output << content.str();
-    output.close();
-
-    if (!output)
-        throw std::runtime_error("Failed to finish saving: " + filename);
+    return content.str();
 }
 
 // Replaces the collection only after the whole file passes.
@@ -223,8 +201,8 @@ void FileStorage::loadAll(std::vector<AttendanceRecord>& records,
 }
 
 // Preserves every correction in its original order.
-void FileStorage::saveAll(const std::vector<CorrectionRecord>& corrections,
-                          const std::string& filename)
+std::string FileStorage::encode(
+    const std::vector<CorrectionRecord>& corrections)
 {
     std::ostringstream content;
     content << "CORRECTIONS_V1\n";
@@ -255,15 +233,7 @@ void FileStorage::saveAll(const std::vector<CorrectionRecord>& corrections,
                 << correction.getCorrectionTime() << '\n';
     }
 
-    std::ofstream output(filename);
-    if (!output)
-        throw std::runtime_error("Cannot open file for saving: " + filename);
-
-    output << content.str();
-    output.close();
-
-    if (!output)
-        throw std::runtime_error("Failed to finish saving: " + filename);
+    return content.str();
 }
 
 // Keeps existing corrections if any file row is invalid.
@@ -322,4 +292,27 @@ void FileStorage::loadAll(std::vector<CorrectionRecord>& corrections,
         throw std::runtime_error("Failed to finish reading: " + filename);
 
     corrections.swap(loaded);
+}
+
+// Saves validated student text through the safe writer.
+void FileStorage::saveAll(const std::vector<Student>& students,
+                          const std::string& filename)
+{
+    SafeFile::writeAll({{filename, encode(students)}});
+}
+
+// Saves validated attendance text through the safe writer.
+void FileStorage::saveAll(
+    const std::vector<AttendanceRecord>& records,
+    const std::string& filename)
+{
+    SafeFile::writeAll({{filename, encode(records)}});
+}
+
+// Saves validated correction text through the safe writer.
+void FileStorage::saveAll(
+    const std::vector<CorrectionRecord>& corrections,
+    const std::string& filename)
+{
+    SafeFile::writeAll({{filename, encode(corrections)}});
 }
