@@ -36,3 +36,15 @@
 - Scope: one running application; no power-loss durability guarantee.
 - Proposed by: Mohamed Nafeez, Member 3.
 - Approved by: Member 2 and 1
+
+### Student and history storage integration (2026-09-18)
+- Added StudentHistoryStore to own and load three collections together.
+- Attendance and correction student IDs must match loaded students.
+- Failed loads preserve all previous in-memory collections.
+- Saving submits all three encoded files to SafeFile in one attempt.
+- AttendanceConsole now lists students and joins profiles with history.
+- Exposes only const collection access; returned student pointers expire on successful reload.
+- This store covers student profiles and history, not course/enrolment ownership.
+- Added isolated integration tests, test runner and sample data.
+- Proposed by: Mohamed Nafeez, Member 3.
+- Team review: pending.

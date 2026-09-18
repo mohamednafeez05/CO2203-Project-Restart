@@ -25,57 +25,35 @@ namespace
     }
 }
 
-// Loads saved history or starts with empty collections.
+// Load the complete dataset before showing any menu.
 AttendanceConsole::AttendanceConsole(const std::string& directory)
+    : dataDirectory(directory)
 {
-    const std::filesystem::path folder(directory);
-    std::filesystem::create_directories(folder);
+    data.load(directory);
+    std::cout << "Student and attendance data ready.\n";
+}
 
-    attendanceFile = (folder / "attendance.txt").string();
-    correctionFile = (folder / "corrections.txt").string();
+void AttendanceConsole::showStudents() const
+{
+    for (const Student& student : data.getStudents())
+        std::cout << student.getPersonId() << " | " << student.getName()
+                  << " | Year " << student.getYearOfStudy()
+                  << " | " << student.getMajor() << '\n';
+    std::cout << "Registered students: " << data.getStudents().size() << '\n';
+}
 
-    // Stop if a previous save left temporary files behind.
-    if (std::filesystem::exists(attendanceFile + ".tmp") ||
-        std::filesystem::exists(correctionFile + ".tmp"))
+bool AttendanceConsole::showProfile(const std::string& id) const
+{
+    const Student* student = data.findStudent(id);
+    if (!student)
     {
-        throw std::runtime_error(
-            "An unfinished save exists. Inspect the .tmp and .bak "
-            "files before starting.");
+        std::cout << "Student not found: " << id << '\n';
+        return false;
     }
-
-    const bool hasAttendance =
-        std::filesystem::exists(attendanceFile);
-
-    const bool hasCorrections =
-        std::filesystem::exists(correctionFile);
-
-    // Missing originals with backups are not a fresh installation.
-    if (!hasAttendance && !hasCorrections &&
-        (std::filesystem::exists(attendanceFile + ".bak") ||
-         std::filesystem::exists(correctionFile + ".bak")))
-    {
-        throw std::runtime_error(
-            "Saved files are missing but backups exist. "
-            "Recover the saved files before starting.");
-    }
-
-    if (hasAttendance != hasCorrections)
-    {
-        throw std::runtime_error(
-            "One attendance data file is missing. "
-            "Restore the missing file before starting.");
-    }
-
-    if (hasAttendance)
-    {
-        attendance.load(attendanceFile, correctionFile);
-        std::cout << "Saved attendance history loaded.\n";
-    }
-    else
-    {
-        std::cout
-            << "No saved attendance history yet. Starting empty.\n";
-    }
+    std::cout << "Student: " << student->getPersonId() << " | "
+              << student->getName() << " | Year " << student->getYearOfStudy()
+              << " | " << student->getMajor() << '\n';
+    return true;
 }
 
 // An empty filter displays every attendance entry.
@@ -84,7 +62,7 @@ void AttendanceConsole::showRecords(
 {
     std::size_t count = 0;
 
-    for (const AttendanceRecord& record : attendance.getRecords())
+    for (const AttendanceRecord& record : data.getRecords())
     {
         if (!studentId.empty() &&
             record.getStudentId() != studentId)
@@ -109,7 +87,7 @@ void AttendanceConsole::showCorrections(
     std::size_t count = 0;
 
     for (const CorrectionRecord& correction :
-         attendance.getCorrections())
+         data.getCorrections())
     {
         if (!studentId.empty() &&
             correction.getStudentId() != studentId)
@@ -134,18 +112,19 @@ void AttendanceConsole::showSummary() const
     std::set<std::string> students;
     std::set<std::string> sessions;
 
-    for (const AttendanceRecord& record : attendance.getRecords())
+    for (const AttendanceRecord& record : data.getRecords())
     {
         students.insert(record.getStudentId());
         sessions.insert(record.getSessionId());
     }
 
     std::cout
+        << "Registered students: " << data.getStudents().size() << '\n'
         << "Attendance entries: "
-        << attendance.getRecords().size() << '\n'
+        << data.getRecords().size() << '\n'
 
         << "Correction entries: "
-        << attendance.getCorrections().size() << '\n'
+        << data.getCorrections().size() << '\n'
 
         << "Students with attendance entries: "
         << students.size() << '\n'
@@ -159,15 +138,16 @@ void AttendanceConsole::run()
 {
     while (true)
     {
-        std::cout << "\nAttendance History\n"
+        std::cout << "\nStudent and Attendance History\n"
                   << "1. View all attendance\n"
                   << "2. View correction history\n"
                   << "3. Find student history\n"
                   << "4. View summary\n"
+                  << "5. List students\n"
                   << "0. Save and exit\n";
 
         const int choice =
-            ConsoleInput::readInt("Choice: ", 0, 4);
+            ConsoleInput::readInt("Choice: ", 0, 5);
 
         switch (choice)
         {
@@ -184,8 +164,11 @@ void AttendanceConsole::run()
             const std::string id =
                 ConsoleInput::readText("Student ID: ");
 
-            showRecords(id);
-            showCorrections(id);
+            if (showProfile(id))
+            {
+                showRecords(id);
+                showCorrections(id);
+            }
             break;
         }
 
@@ -193,13 +176,17 @@ void AttendanceConsole::run()
             showSummary();
             break;
 
+        case 5:
+            showStudents();
+            break;
+
         case 0:
             try
             {
-                attendance.save(attendanceFile, correctionFile);
+                data.save(dataDirectory);
 
                 std::cout
-                    << "Attendance and correction history saved.\n";
+                    << "Student, attendance and correction data saved.\n";
 
                 return;
             }

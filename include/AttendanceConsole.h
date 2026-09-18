@@ -1,19 +1,20 @@
 #ifndef ATTENDANCE_CONSOLE_H
 #define ATTENDANCE_CONSOLE_H
 
-#include "AttendanceRegister.h"
+#include "StudentHistoryStore.h"
 #include <string>
 
 class AttendanceConsole
 {
 private:
-    AttendanceRegister attendance;
-    std::string attendanceFile;
-    std::string correctionFile;
+    StudentHistoryStore data;
+    std::string dataDirectory;
 
     void showRecords(const std::string& studentId) const;
     void showCorrections(const std::string& studentId) const;
     void showSummary() const;
+    void showStudents() const;
+    bool showProfile(const std::string& id) const;
 
 public:
     explicit AttendanceConsole(const std::string& directory);

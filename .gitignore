@@ -81,3 +81,6 @@ Testing/
 /safeSaveTests.exe
 /data/**/*.bak
 /data/**/*.tmp
+/build/
+/data/student_history_demo/
+/data/students.txt
