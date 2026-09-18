@@ -1,5 +1,6 @@
 #include "Course.h"
 #include <stdexcept>
+#include <algorithm>
 
 bool Course::isFull()
 {
@@ -18,7 +19,17 @@ void Course::addStudent(Student& student)
 }
 
 void Course::removeStudent(Student& student)
-{   
+{
+    auto it = std::find(
+        enrolledStudents.begin(),
+        enrolledStudents.end(),
+        &student
+    );
+
+    if (it != enrolledStudents.end())
+    {
+        enrolledStudents.erase(it);
+    }
 }
 
 bool Course::prerequisitesMet(Student& student)
@@ -26,7 +37,7 @@ bool Course::prerequisitesMet(Student& student)
     return true;
 }
 
-std::ostream& operator<<(std::ostream& os, Course& c)
+std::ostream& operator<<(std::ostream& os, const Course& c)
 {
     os << "Course Code: " << c.courseCode << std::endl;
     os << "Title: " << c.title << std::endl;

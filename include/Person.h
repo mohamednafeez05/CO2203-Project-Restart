@@ -21,12 +21,14 @@ public:
     // Requires each role to provide its menu.
     virtual void displayMenu() = 0;
 
-    friend std::ostream& operator<<(std::ostream& os, Person& p);
+    friend std::ostream& operator<<(std::ostream& os, const Person& p);
 
     virtual ~Person();
 
     // Returns the person's identifier.
     std::string getPersonId() const;
+
+    std::string getId() const;
 
     // Returns the person's name.
     std::string getName() const;

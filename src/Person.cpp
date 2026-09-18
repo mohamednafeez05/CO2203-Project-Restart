@@ -11,7 +11,7 @@ Person::~Person()
 {
 }
 
-std::ostream& operator<<(std::ostream& os, Person& p)
+std::ostream& operator<<(std::ostream& os, const Person& p)
 {
     os << "Person ID: " << p.personId << std::endl;
     os << "Name: " << p.name << std::endl;
@@ -43,4 +43,9 @@ Person::Person(const std::string& id, const std::string& name,
     {
         throw std::invalid_argument("Person details cannot be empty.");
     }
+}
+
+std::string Person::getId() const
+{
+    return getPersonId();
 }

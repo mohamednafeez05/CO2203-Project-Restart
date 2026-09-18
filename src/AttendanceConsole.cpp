@@ -36,23 +36,25 @@ AttendanceConsole::AttendanceConsole(const std::string& directory)
 void AttendanceConsole::showStudents() const
 {
     for (const Student& student : data.getStudents())
-        std::cout << student.getPersonId() << " | " << student.getName()
-                  << " | Year " << student.getYearOfStudy()
-                  << " | " << student.getMajor() << '\n';
-    std::cout << "Registered students: " << data.getStudents().size() << '\n';
+    {
+        std::cout << student << '\n';
+    }
+
+    std::cout << "Registered students: "
+              << data.getStudents().size() << '\n';
 }
 
 bool AttendanceConsole::showProfile(const std::string& id) const
 {
     const Student* student = data.findStudent(id);
+
     if (!student)
     {
         std::cout << "Student not found: " << id << '\n';
         return false;
     }
-    std::cout << "Student: " << student->getPersonId() << " | "
-              << student->getName() << " | Year " << student->getYearOfStudy()
-              << " | " << student->getMajor() << '\n';
+
+    std::cout << "Student: " << *student << '\n';
     return true;
 }
 

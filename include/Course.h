@@ -40,7 +40,7 @@ public:
     // Requires each course type to provide its grading rule.
     virtual double calculateFinalGrade() = 0;
 
-    friend std::ostream& operator<<(std::ostream& os, Course& c);
+    friend std::ostream& operator<<(std::ostream& os, const Course& c);
 
     virtual ~Course();
 

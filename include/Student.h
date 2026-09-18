@@ -37,4 +37,6 @@ public:
     const std::vector<Course*>& getEnrolledCourses() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const Student& student);
+
 #endif

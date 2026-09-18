@@ -93,3 +93,12 @@ Student::Student(const std::string& id, const std::string& name,
         throw std::invalid_argument("Student year and major are invalid.");
     }
 }
+
+std::ostream& operator<<(std::ostream& os, const Student& student)
+{
+    os << student.getPersonId() << " | " << student.getName()
+       << " | Year " << student.getYearOfStudy()
+       << " | " << student.getMajor();
+
+    return os;
+}
