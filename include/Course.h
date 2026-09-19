@@ -27,10 +27,11 @@ public:
     // Initialises course details and capacity.
     Course(const std::string& code, const std::string& title,
         int credits, int capacity);
-        
+
     bool isFull();
     bool prerequisitesMet(Student& student);
     const std::vector<TimeSlot>& getSlots() const;
+    void addTimeSlot(const TimeSlot& slot);
     void addStudent(Student& student);
     void removeStudent(Student& student);
 

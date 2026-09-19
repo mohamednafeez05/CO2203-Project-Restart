@@ -109,3 +109,29 @@ Course::Course(const std::string& code, const std::string& title,
         throw std::invalid_argument("Course details are invalid.");
     }
 }
+
+void Course::addTimeSlot(const TimeSlot& slot)
+{
+    if (!enrolledStudents.empty())
+    {
+        throw std::logic_error(
+            "Cannot change slots while students are enrolled.");
+    }
+
+    if (slot.getDay().empty() || slot.getLocation().empty() ||
+        slot.getStartTime() < 0 ||
+        slot.getEndTime() <= slot.getStartTime())
+    {
+        throw std::invalid_argument("Course time slot is invalid.");
+    }
+
+    for (const TimeSlot& existing : slots)
+    {
+        if (existing == slot)
+        {
+            throw std::invalid_argument("Course time slots overlap.");
+        }
+    }
+
+    slots.push_back(slot);
+}

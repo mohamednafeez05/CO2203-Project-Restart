@@ -4,12 +4,15 @@
 #include <iostream>
 #include <sstream>
 #include "CourseFullException.h"
+#include "TimetableClashException.h"
+#include <stdexcept>
 
 class TestCourse : public Course
 {
 public:
-    explicit TestCourse(int capacity = 30)
-    : Course("CO2203", "OOP", 3, capacity) {}
+    explicit TestCourse(int capacity = 30,
+                    const std::string& code = "CO2203")
+        : Course(code, "OOP", 3, capacity) {}
 
     double calculateFinalGrade() override
     {
@@ -17,8 +20,125 @@ public:
     }
 };
 
+void testScheduledEnrolment()
+{
+    TestCourse morning(30, "CO2203");
+    TestCourse overlapping(30, "CO2204");
+    TestCourse adjacent(30, "CO2205");
+
+    Student learner(
+        "S010", "Test Student", "TEST_ONLY", 2, "Engineering"
+    );
+
+    // These test times use minutes after midnight.
+    morning.addTimeSlot(TimeSlot("Monday", 540, 600, "Room A"));
+    overlapping.addTimeSlot(TimeSlot("Monday", 570, 630, "Room B"));
+    adjacent.addTimeSlot(TimeSlot("Monday", 600, 660, "Room C"));
+
+    learner.enrol(morning);
+    learner.enrol(adjacent);
+    assert(learner.getEnrolledCourses().size() == 2);
+
+    bool rejected = false;
+
+    try
+    {
+        learner.enrol(overlapping);
+    }
+    catch (const TimetableClashException&)
+    {
+        rejected = true;
+    }
+
+    assert(rejected);
+    assert(!overlapping.isStudentEnrolled(learner));
+    assert(learner.getEnrolledCourses().size() == 2);
+
+    rejected = false;
+
+    try
+    {
+        morning.addTimeSlot(
+            TimeSlot("Tuesday", 540, 600, "Room A")
+        );
+    }
+    catch (const std::logic_error&)
+    {
+        rejected = true;
+    }
+
+    assert(rejected);
+    assert(morning.getSlots().size() == 1);
+
+    // Dropping one course must preserve the other course's clash.
+    learner.drop(morning);
+    rejected = false;
+
+    try
+    {
+        learner.enrol(overlapping);
+    }
+    catch (const TimetableClashException&)
+    {
+        rejected = true;
+    }
+
+    assert(rejected);
+
+    // Once both conflicting courses are dropped, enrolment succeeds.
+    learner.drop(adjacent);
+    learner.enrol(overlapping);
+    assert(overlapping.isStudentEnrolled(learner));
+
+    learner.drop(overlapping);
+    assert(learner.getEnrolledCourses().empty());
+
+    rejected = false;
+
+    try
+    {
+        morning.addTimeSlot(
+            TimeSlot("Monday", 550, 590, "Room D")
+        );
+    }
+    catch (const std::invalid_argument&)
+    {
+        rejected = true;
+    }
+
+    assert(rejected);
+    assert(morning.getSlots().size() == 1);
+
+    rejected = false;
+
+    try
+    {
+        morning.addTimeSlot(
+            TimeSlot("Tuesday", 600, 540, "Room A")
+        );
+    }
+    catch (const std::invalid_argument&)
+    {
+        rejected = true;
+    }
+
+    assert(rejected);
+    assert(morning.getSlots().size() == 1);
+
+    morning.addTimeSlot(TimeSlot("Tuesday", 540, 600, "Room A"));
+    learner.enrol(morning);
+    assert(morning.isStudentEnrolled(learner));
+    learner.drop(morning);
+
+    std::cout
+        << "PASS: scheduled enrolment, clashes, slot validation "
+        << "and timetable cleanup.\n";
+}
+
 int main()
 {
+    testScheduledEnrolment();
+
     Student first(
         "S001", "Nafeez", "TEST_ONLY", 2, "Computer Engineering"
     );
