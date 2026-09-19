@@ -8,6 +8,7 @@
 #include <vector>
 #include "CourseStorage.h"
 
+class AttendanceRegister;
 // Owns the collections used by the history viewer; exposes read-only access.
 class StudentHistoryStore
 {
@@ -28,6 +29,7 @@ public:
 
     const Course* findCourse(const std::string& code) const;
 
+    void importAttendance(const AttendanceRegister& batch);
     void enrol(const std::string& studentId,
                const std::string& courseCode);
 

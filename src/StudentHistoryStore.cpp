@@ -5,6 +5,8 @@
 #include <set>
 #include <stdexcept>
 #include <fstream>
+#include "AttendanceRegister.h"
+#include <utility>
 
 namespace
 {
@@ -212,4 +214,51 @@ std::vector<const Course*> StudentHistoryStore::getCourses() const
         result.push_back(course.get());
 
     return result;
+}
+// Accepts the complete batch or leaves both collections unchanged.
+void StudentHistoryStore::importAttendance(
+    const AttendanceRegister& batch)
+{
+    auto nextRecords = records;
+    auto nextCorrections = corrections;
+    std::set<std::pair<std::string, std::string>> marked;
+
+    for (const AttendanceRecord& record : records)
+        marked.insert({record.getStudentId(), record.getSessionId()});
+
+    for (const AttendanceRecord& record : batch.getRecords())
+    {
+        if (!marked.insert({record.getStudentId(),
+                            record.getSessionId()}).second)
+        {
+            throw std::runtime_error(
+                "Duplicate attendance in imported batch.");
+        }
+
+        nextRecords.push_back(record);
+    }
+
+    for (const CorrectionRecord& note : batch.getCorrections())
+    {
+        for (const CorrectionRecord& existing : nextCorrections)
+        {
+            if (existing.getStudentId() == note.getStudentId() &&
+                existing.getSessionId() == note.getSessionId() &&
+                existing.getReason() == note.getReason() &&
+                existing.getCorrectionTime() == note.getCorrectionTime())
+            {
+                throw std::runtime_error(
+                    "Duplicate correction in imported batch.");
+            }
+        }
+
+        nextCorrections.push_back(note);
+    }
+
+    validateLinks(students, nextRecords, nextCorrections);
+    FileStorage::encode(nextRecords);
+    FileStorage::encode(nextCorrections);
+
+    records.swap(nextRecords);
+    corrections.swap(nextCorrections);
 }
