@@ -55,6 +55,10 @@ bool AttendanceConsole::showProfile(const std::string& id) const
     }
 
     std::cout << "Student: " << *student << '\n';
+
+    for (const Course* course : student->getEnrolledCourses())
+        std::cout << *course;
+
     return true;
 }
 

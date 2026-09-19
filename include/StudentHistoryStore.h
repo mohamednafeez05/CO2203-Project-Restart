@@ -6,11 +6,13 @@
 #include "CorrectionRecord.h"
 #include <string>
 #include <vector>
+#include "CourseStorage.h"
 
 // Owns the collections used by the history viewer; exposes read-only access.
 class StudentHistoryStore
 {
 private:
+    CourseStorage::Courses courses;
     std::vector<Student> students;
     std::vector<AttendanceRecord> records;
     std::vector<CorrectionRecord> corrections;
@@ -19,6 +21,18 @@ private:
                               const std::vector<AttendanceRecord>& records,
                               const std::vector<CorrectionRecord>& corrections);
 public:
+    StudentHistoryStore() = default;
+    StudentHistoryStore(const StudentHistoryStore&) = delete;
+    StudentHistoryStore& operator=(const StudentHistoryStore&) = delete;
+
+    const Course* findCourse(const std::string& code) const;
+
+    void enrol(const std::string& studentId,
+               const std::string& courseCode);
+
+    void drop(const std::string& studentId,
+              const std::string& courseCode);
+
     void load(const std::string& directory);
     void save(const std::string& directory) const;
     const std::vector<Student>& getStudents() const;
