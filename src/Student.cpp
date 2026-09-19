@@ -2,6 +2,10 @@
 #include <stdexcept>
 #include "Course.h"
 #include "ConsoleInput.h"
+#include "CourseFullException.h"
+#include "PrerequisiteNotMetException.h"
+#include "TimetableClashException.h"
+#include <algorithm>
 
 // Displays the student's available actions.
 void Student::displayMenu()
@@ -61,10 +65,59 @@ void Student::viewTimetable()
 
 void Student::drop(Course& course)
 {
+    auto it = std::find(
+        enrolledCourses.begin(),
+        enrolledCourses.end(),
+        &course
+    );
+
+    if (it != enrolledCourses.end())
+    {
+        // Remove timetable references before removing the enrolment.
+        for (const TimeSlot& slot : course.getSlots())
+        {
+            timetable.removeTimeSlot(slot);
+        }
+
+        enrolledCourses.erase(it);
+        course.removeStudent(*this);
+    }
 }
 
 void Student::enrol(Course& course)
 {
+    // Repeated enrolment leaves the existing registration unchanged.
+    if (course.isStudentEnrolled(*this))
+    {
+        return;
+    }
+
+    if (course.isFull())
+    {
+        throw CourseFullException();
+    }
+
+    if (!course.prerequisitesMet(*this))
+    {
+        throw PrerequisiteNotMetException();
+    }
+
+    // Check all slots before changing either course list.
+    for (const TimeSlot& slot : course.getSlots())
+    {
+        if (timetable.hasClashWith(slot))
+        {
+            throw TimetableClashException();
+        }
+    }
+
+    course.addStudent(*this);
+    enrolledCourses.push_back(&course);
+
+    for (const TimeSlot& slot : course.getSlots())
+    {
+        timetable.addTimeSlot(slot);
+    }
 }
 
 int Student::getYearOfStudy() const

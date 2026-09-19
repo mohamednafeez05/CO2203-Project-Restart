@@ -3,11 +3,13 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include "CourseFullException.h"
 
 class TestCourse : public Course
 {
 public:
-    TestCourse() : Course("CO2203", "OOP", 3, 30) {}
+    explicit TestCourse(int capacity = 30)
+    : Course("CO2203", "OOP", 3, capacity) {}
 
     double calculateFinalGrade() override
     {
@@ -44,6 +46,51 @@ int main()
 
     course.removeStudent(second);
     assert(course.getEnrolledStudents().empty());
+
+        TestCourse limitedCourse(1);
+
+    first.enrol(limitedCourse);
+    assert(limitedCourse.isStudentEnrolled(first));
+    assert(first.getEnrolledCourses().size() == 1);
+    assert(first.getEnrolledCourses().front() == &limitedCourse);
+
+    first.enrol(limitedCourse);
+    assert(first.getEnrolledCourses().size() == 1);
+    assert(limitedCourse.getEnrolledStudents().size() == 1);
+
+    bool fullRejected = false;
+
+    try
+    {
+        second.enrol(limitedCourse);
+    }
+    catch (const CourseFullException&)
+    {
+        fullRejected = true;
+    }
+
+    assert(fullRejected);
+    assert(second.getEnrolledCourses().empty());
+    assert(!limitedCourse.isStudentEnrolled(second));
+    assert(limitedCourse.getEnrolledStudents().size() == 1);
+
+    first.drop(limitedCourse);
+    assert(first.getEnrolledCourses().empty());
+    assert(limitedCourse.getEnrolledStudents().empty());
+
+    first.drop(limitedCourse);
+    assert(limitedCourse.getEnrolledStudents().empty());
+
+    second.enrol(limitedCourse);
+    assert(limitedCourse.isStudentEnrolled(second));
+    assert(second.getEnrolledCourses().size() == 1);
+
+    second.drop(limitedCourse);
+    assert(second.getEnrolledCourses().empty());
+    assert(limitedCourse.getEnrolledStudents().empty());
+
+    std::cout
+        << "PASS: enrolment, duplicate prevention, capacity and dropping.\n";
 
     std::ostringstream studentText;
     const Student& readOnlyStudent = first;
