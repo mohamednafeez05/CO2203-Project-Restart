@@ -14,6 +14,9 @@ private:
     void showCorrections(const std::string& studentId) const;
     void showSummary() const;
     void showStudents() const;
+    void showCourses() const;
+    void changeEnrolment(bool enrol);
+    void showTimetable() const;
     bool showProfile(const std::string& id) const;
 
 public:

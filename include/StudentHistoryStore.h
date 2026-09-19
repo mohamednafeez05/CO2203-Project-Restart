@@ -21,6 +21,7 @@ private:
                               const std::vector<AttendanceRecord>& records,
                               const std::vector<CorrectionRecord>& corrections);
 public:
+    std::vector<const Course*> getCourses() const;
     StudentHistoryStore() = default;
     StudentHistoryStore(const StudentHistoryStore&) = delete;
     StudentHistoryStore& operator=(const StudentHistoryStore&) = delete;

@@ -23,6 +23,7 @@ public:
     void enrol(Course& course);
     void drop(Course& course);
     void viewTimetable();
+    const Timetable& getTimetable() const;
 
     // Displays the student menu.
     void displayMenu() override;

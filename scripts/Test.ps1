@@ -11,7 +11,7 @@ Push-Location $projectRoot
 try {
     & g++ -std=c++17 -Wall "-I$includeFolder" @projectSources (Join-Path $projectRoot 'src/main.cpp') -o (Join-Path $projectRoot 'mainApp.exe')
     if ($LASTEXITCODE -ne 0) { throw 'Application build failed.' }
-    foreach ($testName in @('SafeSaveTest', 'PersistenceTest', 'StudentHistoryTest', 'IntegrationTest', 'CourseStorageTest')) {
+    foreach ($testName in @('SafeSaveTest', 'PersistenceTest', 'StudentHistoryTest', 'IntegrationTest', 'CourseStorageTest', 'RegistrationConsoleTest')) {
         $executable = Join-Path $buildFolder ($testName + '.exe')
         & g++ -std=c++17 -Wall "-I$includeFolder" (Join-Path $projectRoot "tests/$testName.cpp") @projectSources -o $executable
         if ($LASTEXITCODE -ne 0) { throw "Build failed: $testName" }
@@ -21,6 +21,6 @@ try {
             if ($LASTEXITCODE -ne 0) { throw "Test failed: $testName" }
         } finally { Pop-Location }
     }
-    Write-Host 'Application build and all five test suites passed.'
+    Write-Host 'Application build and all six test suites passed.'
     Write-Host "Test data retained at: $testRunFolder"
 } finally { Pop-Location }

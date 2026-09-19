@@ -203,3 +203,13 @@ void StudentHistoryStore::drop(const std::string& studentId,
 
     throw std::runtime_error("Student or course not found.");
 }
+
+std::vector<const Course*> StudentHistoryStore::getCourses() const
+{
+    std::vector<const Course*> result;
+
+    for (const auto& course : courses)
+        result.push_back(course.get());
+
+    return result;
+}

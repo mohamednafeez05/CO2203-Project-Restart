@@ -150,10 +150,14 @@ void AttendanceConsole::run()
                   << "3. Find student history\n"
                   << "4. View summary\n"
                   << "5. List students\n"
+                  << "6. List courses\n"
+                  << "7. Enrol a student\n"
+                  << "8. Drop a course\n"
+                  << "9. View student timetable\n"
                   << "0. Save and exit\n";
 
         const int choice =
-            ConsoleInput::readInt("Choice: ", 0, 5);
+            ConsoleInput::readInt("Choice: ", 0, 9);
 
         switch (choice)
         {
@@ -186,13 +190,29 @@ void AttendanceConsole::run()
             showStudents();
             break;
 
+        case 6:
+            showCourses();
+            break;
+
+        case 7:
+            changeEnrolment(true);
+            break;
+
+        case 8:
+            changeEnrolment(false);
+            break;
+
+        case 9:
+            showTimetable();
+            break;
+
         case 0:
             try
             {
                 data.save(dataDirectory);
 
                 std::cout
-                    << "Student, attendance and correction data saved.\n";
+                    << "Student, course, enrolment, attendance and correction data saved.\n";
 
                 return;
             }
@@ -205,4 +225,90 @@ void AttendanceConsole::run()
             break;
         }
     }
+}
+
+void AttendanceConsole::showCourses() const
+{
+    const auto courses = data.getCourses();
+
+    if (courses.empty())
+    {
+        std::cout << "No courses available.\n";
+        return;
+    }
+
+    for (const Course* course : courses)
+    {
+        std::cout << *course
+                  << "Enrolled: "
+                  << course->getEnrolledStudents().size()
+                  << " / " << course->getCapacity() << '\n';
+
+        for (const TimeSlot& slot : course->getSlots())
+        {
+            std::cout << slot.getDay()
+                      << " | " << slot.getStartTime()
+                      << " - " << slot.getEndTime()
+                      << " | " << slot.getLocation() << '\n';
+        }
+    }
+}
+
+void AttendanceConsole::changeEnrolment(bool enrol)
+{
+    const std::string id = ConsoleInput::readText("Student ID: ");
+    const std::string code = ConsoleInput::readText("Course code: ");
+
+    const Student* student = data.findStudent(id);
+    const Course* course = data.findCourse(code);
+
+    if (!student || !course)
+    {
+        std::cout << "Student or course not found.\n";
+        return;
+    }
+
+    const bool enrolled = course->isStudentEnrolled(*student);
+
+    if (enrol && enrolled)
+    {
+        std::cout << "Student is already enrolled.\n";
+        return;
+    }
+
+    if (!enrol && !enrolled)
+    {
+        std::cout << "Student is not enrolled in this course.\n";
+        return;
+    }
+
+    try
+    {
+        if (enrol)
+            data.enrol(id, code);
+        else
+            data.drop(id, code);
+
+        std::cout
+            << (enrol ? "Enrolment successful.\n" : "Course dropped.\n")
+            << "Choose 0 to save your changes before exiting.\n";
+    }
+    catch (const std::exception& error)
+    {
+        std::cout << "Action failed: " << error.what() << '\n';
+    }
+}
+
+void AttendanceConsole::showTimetable() const
+{
+    const std::string id = ConsoleInput::readText("Student ID: ");
+    const Student* student = data.findStudent(id);
+
+    if (!student)
+    {
+        std::cout << "Student not found: " << id << '\n';
+        return;
+    }
+
+    std::cout << *student << '\n' << student->getTimetable();
 }

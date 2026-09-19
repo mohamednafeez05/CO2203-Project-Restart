@@ -155,3 +155,8 @@ std::ostream& operator<<(std::ostream& os, const Student& student)
 
     return os;
 }
+
+const Timetable& Student::getTimetable() const
+{
+    return timetable;
+}
