@@ -23,11 +23,11 @@ public:
 
     AttendanceSession();
 
+    // Initialises a closed attendance session.
     AttendanceSession(
-        std::string sessionId,
+        const std::string& sessionId,
         const TimeSlot* timeSlot,
-        int durationSeconds =
-            defaultDurationSeconds
+        int durationSeconds = defaultDurationSeconds
     );
 
     void open();

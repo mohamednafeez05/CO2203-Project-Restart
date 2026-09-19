@@ -10,16 +10,29 @@ class Course;
 
 class Student : public Person
 {
-    private:
-        int yearOfStudy;
-        std::string major;
-        std::vector<Course*> enrolledCourses;
-        Timetable timetable;
+private:
+    int yearOfStudy;
+    std::string major;
+    std::vector<Course*> enrolledCourses;
+    Timetable timetable;
+
 public:
+    Student(const std::string& id,
+            const std::string& name,
+            const std::string& storedHash,
+            int year,
+            const std::string& major);
+
     void enrol(Course& course);
     void drop(Course& course);
     void viewTimetable();
-    void displayMenu();
+
+    void displayMenu() override;
+
+    int getYearOfStudy() const;
+    std::string getMajor() const;
+
+    const std::vector<Course*>& getEnrolledCourses() const;
 };
 
 #endif

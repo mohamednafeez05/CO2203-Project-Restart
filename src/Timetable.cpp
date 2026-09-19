@@ -2,11 +2,30 @@
 
 using namespace std;
 
-void Timetable::addTimeSlot(const TimeSlot* slot)
+// Stores a reference to an existing slot.
+void Timetable::addTimeSlot(const TimeSlot& slot)
 {
-    if (slot != nullptr)
+    timeSlots.push_back(&slot);
+}
+
+// Creates an empty timetable.
+Timetable::Timetable()
+{
+}
+
+// Removes references to the supplied slot.
+void Timetable::removeTimeSlot(const TimeSlot& slot)
+{
+    for (auto it = timeSlots.begin(); it != timeSlots.end(); )
     {
-        timeSlots.push_back(slot);
+        if (*it == &slot)
+        {
+            it = timeSlots.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
     }
 }
 

@@ -13,11 +13,11 @@ private:
 
 public:
     TimeSlot();
-
-    TimeSlot(std::string day,
-             int startTime,
-             int endTime,
-             std::string location);
+    // Initialises the slot details.
+    TimeSlot(const std::string& day,
+            int startTime,
+            int endTime,
+            const std::string& location);
 
     bool overlaps(const TimeSlot& other) const;
 

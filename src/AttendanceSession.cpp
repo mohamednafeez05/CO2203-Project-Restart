@@ -46,7 +46,7 @@ bool AttendanceSession::isOpen() const
     return true;
 }
 
-string AttendanceSession::getId() const
+string AttendanceSession::getSessionId() const
 {
     return sessionId;
 }
@@ -54,4 +54,27 @@ string AttendanceSession::getId() const
 const TimeSlot* AttendanceSession::getTimeSlot() const
 {
     return timeSlot;
+}
+
+// Initialises an empty, closed session.
+AttendanceSession::AttendanceSession()
+    : sessionId(""),
+      timeSlot(nullptr),
+      active(false),
+      startTime(0),
+      expiryTime(0),
+      durationSeconds(defaultDurationSeconds)
+{
+}
+
+// Returns the session start time.
+std::time_t AttendanceSession::getStartTime() const
+{
+    return startTime;
+}
+
+// Returns the session expiry time.
+std::time_t AttendanceSession::getExpiryTime() const
+{
+    return expiryTime;
 }

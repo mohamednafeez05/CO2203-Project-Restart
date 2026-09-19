@@ -13,7 +13,7 @@ bool AttendanceRegister::alreadyMarked(
     std::string studentId,
     std::string sessionId) const
 {
-    for (int i = 0; i < records.size(); i++)
+    for (std::size_t i = 0; i < records.size(); i++)
     {
         if (records[i].getStudentId() == studentId &&
             records[i].getSessionId() == sessionId)
@@ -45,7 +45,7 @@ void AttendanceRegister::markPresent(
     }
 
     std::string studentId =
-        student.getId();
+        student.getPersonId();
 
     if (alreadyMarked(
             studentId,
@@ -83,7 +83,7 @@ int AttendanceRegister::getPresentCount(
 {
     int count = 0;
 
-    for (int i = 0; i < records.size(); i++)
+    for (std::size_t i = 0; i < records.size(); i++)
     {
         if (records[i].getStudentId()
             == studentId)
