@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
+#include "AttendanceConsole.h"
+#include <sstream>
 
 int main()
 {
@@ -107,6 +109,42 @@ int main()
     assert(restored.getRecords()[0].getCheckInTime() == 1700000000);
     assert(restored.getCorrections()[0].getCorrectionTime() == 1700000001);
     assert(restored.getCorrections()[0].getReason() == "Reviewed entry");
+
+    makeBatch("S001", "SESSION4", "S001");
+
+    const std::string command =
+        "10\n" + attendance + "\n" + corrections + "\n";
+
+    std::istringstream input(command + command + "0\n");
+    std::ostringstream output;
+
+    auto* previousInput = std::cin.rdbuf(input.rdbuf());
+    auto* previousOutput = std::cout.rdbuf(output.rdbuf());
+
+    try
+    {
+        AttendanceConsole console(folder.string());
+        console.run();
+    }
+    catch (...)
+    {
+        std::cin.rdbuf(previousInput);
+        std::cout.rdbuf(previousOutput);
+        throw;
+    }
+
+    std::cin.rdbuf(previousInput);
+    std::cout.rdbuf(previousOutput);
+
+    assert(output.str().find(
+        "Imported 1 attendance entries and 1 correction notes.") !=
+        std::string::npos);
+
+    assert(output.str().find("Import failed:") != std::string::npos);
+
+    restored.load(folder.string());
+    assert(restored.getRecords().size() == 2);
+    assert(restored.getCorrections().size() == 3);
 
     std::cout
         << "PASS: attendance transfer, rejected batches and restart.\n";

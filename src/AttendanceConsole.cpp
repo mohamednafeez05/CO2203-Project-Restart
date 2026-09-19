@@ -8,6 +8,7 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include "AttendanceRegister.h"
 
 namespace
 {
@@ -154,10 +155,11 @@ void AttendanceConsole::run()
                   << "7. Enrol a student\n"
                   << "8. Drop a course\n"
                   << "9. View student timetable\n"
+                  << "10. Import attendance batch\n"
                   << "0. Save and exit\n";
 
         const int choice =
-            ConsoleInput::readInt("Choice: ", 0, 9);
+            ConsoleInput::readInt("Choice: ", 0, 10);
 
         switch (choice)
         {
@@ -204,6 +206,10 @@ void AttendanceConsole::run()
 
         case 9:
             showTimetable();
+            break;
+
+        case 10:
+            importAttendanceBatch();
             break;
 
         case 0:
@@ -311,4 +317,31 @@ void AttendanceConsole::showTimetable() const
     }
 
     std::cout << *student << '\n' << student->getTimetable();
+}
+
+// Imports both files before changing the history collections.
+void AttendanceConsole::importAttendanceBatch()
+{
+    const std::string attendanceFile =
+        ConsoleInput::readText("Attendance batch file: ");
+
+    const std::string correctionFile =
+        ConsoleInput::readText("Correction batch file: ");
+
+    try
+    {
+        AttendanceRegister batch;
+        batch.load(attendanceFile, correctionFile);
+        data.importAttendance(batch);
+
+        std::cout << "Imported " << batch.getRecords().size()
+                  << " attendance entries and "
+                  << batch.getCorrections().size()
+                  << " correction notes.\n"
+                  << "Choose 0 to save your changes before exiting.\n";
+    }
+    catch (const std::exception& error)
+    {
+        std::cout << "Import failed: " << error.what() << '\n';
+    }
 }

@@ -10,6 +10,7 @@ private:
     StudentHistoryStore data;
     std::string dataDirectory;
 
+    void importAttendanceBatch();
     void showRecords(const std::string& studentId) const;
     void showCorrections(const std::string& studentId) const;
     void showSummary() const;
