@@ -5,10 +5,10 @@
 #include <set>
 #include <stdexcept>
 #include <fstream>
-#include "AttendanceRegister.h"
 #include <utility>
 #include <iomanip>
 #include <sstream>
+#include "AttendanceRegister.h"
 
 namespace
 {
