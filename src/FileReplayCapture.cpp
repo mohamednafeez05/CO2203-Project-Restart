@@ -3,21 +3,62 @@
 #include <stdexcept>
 #include <cctype>
 
+// Removes spaces, tabs and carriage returns from both ends of the text.
+// (A file saved on Windows leaves a '\r' at the end of each line.)
+static std::string trim(const std::string& text)
+{
+    std::size_t first = 0;
+
+    while (first < text.size() &&
+           std::isspace(static_cast<unsigned char>(text[first])))
+    {
+        first++;
+    }
+
+    std::size_t last = text.size();
+
+    while (last > first &&
+           std::isspace(static_cast<unsigned char>(text[last - 1])))
+    {
+        last--;
+    }
+
+    return text.substr(first, last - first);
+}
+
 FileReplayCapture::FileReplayCapture(
-    std::string fileName)
+    const std::string& fileName)
     : fileName(fileName),
       currentSession(nullptr),
       active(false)
 {
 }
 
+FileReplayCapture::~FileReplayCapture()
+{
+    // Make sure the file is closed even if the caller forgot.
+    if (inputFile.is_open())
+    {
+        inputFile.close();
+    }
+}
+
 void FileReplayCapture::beginSession(
     AttendanceSession& session)
 {
-    // Make sure a previous replay is fully closed before starting again.
+    // Finish any previous replay before starting a new one.
     if (active || inputFile.is_open())
     {
         endSession();
+    }
+
+    inputFile.clear();
+    inputFile.open(fileName.c_str());
+
+    if (!inputFile.is_open())
+    {
+        throw std::runtime_error(
+            "Cannot open attendance replay file.");
     }
 
     currentSession = &session;
@@ -25,16 +66,6 @@ void FileReplayCapture::beginSession(
     if (!currentSession->isOpen())
     {
         currentSession->open();
-    }
-
-    inputFile.open(fileName.c_str());
-
-    if (!inputFile.is_open())
-    {
-        currentSession = nullptr;
-        throw std::runtime_error(
-            "Cannot open attendance replay file."
-        );
     }
 
     active = true;
@@ -53,30 +84,28 @@ bool FileReplayCapture::captureNext(
         return false;
     }
 
-    if (!std::getline(inputFile, studentId))
-    {
-        return false;
-    }
+    std::string line;
 
-    // A replay record must contain a non-whitespace student ID.
-    bool hasNonWhitespace = false;
-    for (char ch : studentId)
+    // Skip blank lines so a trailing newline is not an error.
+    while (std::getline(inputFile, line))
     {
-        if (!std::isspace(static_cast<unsigned char>(ch)))
+        line = trim(line);
+
+        if (!line.empty())
         {
-            hasNonWhitespace = true;
-            break;
+            studentId = line;
+            return true;
         }
     }
 
-    if (!hasNonWhitespace)
+    // getline failed: either a normal end of file or a real read error.
+    if (inputFile.bad())
     {
         throw std::runtime_error(
-            "Malformed attendance record."
-        );
+            "Failed to read attendance replay file.");
     }
 
-    return true;
+    return false;
 }
 
 void FileReplayCapture::endSession()

@@ -1,23 +1,28 @@
 #include "CorrectionRecord.h"
 
 CorrectionRecord::CorrectionRecord()
+    : studentId(""),
+      sessionId(""),
+      lecturerId(""),
+      reason(""),
+      action(MARKED_PRESENT),
+      correctionTime(0)
 {
-    studentId = "";
-    sessionId = "";
-    reason = "";
-    correctionTime = 0;
 }
 
 CorrectionRecord::CorrectionRecord(
-    std::string studentId,
-    std::string sessionId,
-    std::string reason)
+    const std::string& studentId,
+    const std::string& sessionId,
+    const std::string& lecturerId,
+    const std::string& reason,
+    Action action)
+    : studentId(studentId),
+      sessionId(sessionId),
+      lecturerId(lecturerId),
+      reason(reason),
+      action(action),
+      correctionTime(std::time(nullptr))
 {
-    this->studentId = studentId;
-    this->sessionId = sessionId;
-    this->reason = reason;
-
-    correctionTime = std::time(0);
 }
 
 std::string CorrectionRecord::getStudentId() const
@@ -30,9 +35,19 @@ std::string CorrectionRecord::getSessionId() const
     return sessionId;
 }
 
+std::string CorrectionRecord::getLecturerId() const
+{
+    return lecturerId;
+}
+
 std::string CorrectionRecord::getReason() const
 {
     return reason;
+}
+
+CorrectionRecord::Action CorrectionRecord::getAction() const
+{
+    return action;
 }
 
 std::time_t CorrectionRecord::getCorrectionTime() const

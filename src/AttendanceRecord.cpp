@@ -1,20 +1,19 @@
 #include "AttendanceRecord.h"
 
 AttendanceRecord::AttendanceRecord()
+    : studentId(""),
+      sessionId(""),
+      checkInTime(0)
 {
-    studentId = "";
-    sessionId = "";
-    checkInTime = 0;
 }
 
 AttendanceRecord::AttendanceRecord(
-    std::string studentId,
-    std::string sessionId)
+    const std::string& studentId,
+    const std::string& sessionId)
+    : studentId(studentId),
+      sessionId(sessionId),
+      checkInTime(std::time(nullptr))
 {
-    this->studentId = studentId;
-    this->sessionId = sessionId;
-
-    checkInTime = std::time(0);
 }
 
 std::string AttendanceRecord::getStudentId() const

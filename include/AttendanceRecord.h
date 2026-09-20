@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 
+// One student's check-in for one session.
 class AttendanceRecord
 {
 private:
@@ -14,9 +15,10 @@ private:
 public:
     AttendanceRecord();
 
+    // Stamps the record with the current time.
     AttendanceRecord(
-        std::string studentId,
-        std::string sessionId
+        const std::string& studentId,
+        const std::string& sessionId
     );
 
     std::string getStudentId() const;

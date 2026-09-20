@@ -2,6 +2,17 @@
 
 using namespace std;
 
+// Initialises an empty, closed session.
+AttendanceSession::AttendanceSession()
+    : sessionId(""),
+      timeSlot(nullptr),
+      active(false),
+      startTime(0),
+      expiryTime(0),
+      durationSeconds(defaultDurationSeconds)
+{
+}
+
 AttendanceSession::AttendanceSession(
     const string& id,
     const TimeSlot* slot,
@@ -22,13 +33,23 @@ void AttendanceSession::open()
 
     startTime = time(nullptr);
 
-    expiryTime =
-        startTime + durationSeconds;
+    expiryTime = startTime + durationSeconds;
 }
 
 void AttendanceSession::close()
 {
     active = false;
+}
+
+bool AttendanceSession::isExpired() const
+{
+    // A session that was never opened has not expired.
+    if (startTime == 0)
+    {
+        return false;
+    }
+
+    return time(nullptr) >= expiryTime;
 }
 
 bool AttendanceSession::isOpen() const
@@ -38,15 +59,10 @@ bool AttendanceSession::isOpen() const
         return false;
     }
 
-    if (time(nullptr) >= expiryTime)
-    {
-        return false;
-    }
-
-    return true;
+    return !isExpired();
 }
 
-string AttendanceSession::getId() const
+string AttendanceSession::getSessionId() const
 {
     return sessionId;
 }
@@ -54,4 +70,19 @@ string AttendanceSession::getId() const
 const TimeSlot* AttendanceSession::getTimeSlot() const
 {
     return timeSlot;
+}
+
+time_t AttendanceSession::getStartTime() const
+{
+    return startTime;
+}
+
+time_t AttendanceSession::getExpiryTime() const
+{
+    return expiryTime;
+}
+
+int AttendanceSession::getDurationSeconds() const
+{
+    return durationSeconds;
 }
