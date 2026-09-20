@@ -168,6 +168,10 @@ std::string CourseStorage::encode(
     const std::vector<Student>& students,
     const Courses& courses)
 {
+    for (const auto& s : students) if (!s.getCompletedCourses().empty())
+        throw std::runtime_error("Use SystemStorage to preserve completed courses.");
+    for (const auto& c : courses) if (c && !c->getScores().empty())
+        throw std::runtime_error("Use SystemStorage to preserve assessment scores.");
     std::ostringstream output;
     output << "COURSE_ENROLMENTS_V1\n";
 

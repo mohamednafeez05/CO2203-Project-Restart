@@ -51,3 +51,12 @@ CorrectionRecord::CorrectionRecord(std::string studentId,
       correctionTime(recordedTime)
 {
 }
+#include <stdexcept>
+CorrectionRecord::CorrectionRecord(const std::string& student, const std::string& session, const std::string& actor, const std::string& text, Action change, std::time_t at)
+    : lecturerId(actor), action(change), studentId(student), sessionId(session), reason(text), correctionTime(at)
+{
+    if (actor.empty() || text.find_first_not_of(" \t\r\n") == std::string::npos || at <= 0 || (change != MARKED_PRESENT && change != REMOVED_PRESENT))
+        throw std::invalid_argument("Invalid correction.");
+}
+std::string CorrectionRecord::getLecturerId() const { return lecturerId; }
+CorrectionRecord::Action CorrectionRecord::getAction() const { return action; }

@@ -1,0 +1,35 @@
+UNIVERSITY_V1
+USER 3 "A001" "Demo Administrator" "admin123" 1 "Administration"
+USER 2 "L001" "Demo Lecturer" "lecturer123" 1 "Computing"
+USER 2 "L002" "Other Lecturer" "lecturer123" 1 "Computing"
+USER 1 "S001" "Nafeez" "student123" 2 "Computer Engineering"
+USER 1 "S002" "Demo Student" "student123" 2 "Computer Engineering"
+COURSE 1 "C101" "Programming Fundamentals" 3 30
+SLOT "C101" "Monday" 540 600 "Room A"
+ASSIGN "C101" "L001"
+SCORES "C101" 0
+COURSE 2 "C201" "Programming Lab" 1 1
+SLOT "C201" "Tuesday" 600 660 "Lab B"
+ASSIGN "C201" "L001"
+PREREQ "C201" "C101"
+SCORES "C201" 0
+COURSE 3 "C301" "Software Project" 3 20
+SLOT "C301" "Monday" 570 630 "Room C"
+ASSIGN "C301" "L001"
+PREREQ "C301" "C201"
+SCORES "C301" 2 50 100
+COMPLETE "S001" "C101"
+ENROL "S001" "C101"
+ENROL "S002" "C101"
+SESSION "MEET1" "C101" "L001" 0 600 1789908125 1789908725
+ROSTER "MEET1" "S001"
+ROSTER "MEET1" "S002"
+SESSION "MEET2" "C101" "L001" 0 600 1789908125 1789908725
+ROSTER "MEET2" "S001"
+ROSTER "MEET2" "S002"
+RECORD "S001" "MEET1" 1789908125 "present" "rotating-code"
+RECORD "S001" "MEET2" 1789908125 "present" "file-replay"
+CORRECTION "S001" "MEET1" "L001" 1789908125 2 "Wrong check-in"
+CORRECTION "S001" "MEET1" "L001" 1789908125 1 "Verified presence"
+CORRECTION "S002" "MEET1" "L001" 1789908125 1 "Verified missing capture"
+END

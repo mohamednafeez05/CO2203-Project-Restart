@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <cctype>
+#include <stdexcept>
 #include "TimeSlot.h"
 
 using namespace std;
@@ -16,6 +19,17 @@ TimeSlot::TimeSlot(const string& day,
       endTime(endTime),
       location(location)
 {
+    std::string key = day;
+    std::transform(key.begin(), key.end(), key.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    const std::string days[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    bool found = false;
+    for (const auto& canonical : days)
+    {
+        std::string lower = canonical;
+        std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+        if (key == lower || key == lower.substr(0, 3)) { this->day = canonical; found = true; break; }
+    }
+    if (!found) throw std::invalid_argument("Use a weekday name or three-letter abbreviation.");
 }
 
 string TimeSlot::getDay() const

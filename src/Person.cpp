@@ -49,3 +49,8 @@ std::string Person::getId() const
 {
     return getPersonId();
 }
+void Person::updateIdentity(const std::string& value, const std::string& credential)
+{
+    if (value.empty() || credential.empty()) throw std::invalid_argument("Empty name or credential.");
+    name = value; passwordHash = credential;
+}

@@ -6,7 +6,11 @@
 
 class CorrectionRecord
 {
+public:
+    enum Action { NOTE_ONLY, MARKED_PRESENT, REMOVED_PRESENT };
 private:
+    std::string lecturerId;
+    Action action = NOTE_ONLY;
     std::string studentId;
     std::string sessionId;
     std::string reason;
@@ -14,6 +18,9 @@ private:
 
 public:
     CorrectionRecord();
+    CorrectionRecord(const std::string& student, const std::string& session, const std::string& actor, const std::string& reason, Action action, std::time_t at = std::time(nullptr));
+    std::string getLecturerId() const;
+    Action getAction() const;
 
     CorrectionRecord(
         std::string studentId,

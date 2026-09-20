@@ -127,6 +127,8 @@ std::string FileStorage::encode(
 
     for (const AttendanceRecord& record : records)
     {
+        if (record.getMethod() != "legacy" || record.getStatus() != "present")
+            throw std::runtime_error("Use SystemStorage to preserve attendance metadata.");
         std::string student = record.getStudentId();
         std::string session = record.getSessionId();
 
@@ -209,6 +211,8 @@ std::string FileStorage::encode(
 
     for (const CorrectionRecord& correction : corrections)
     {
+        if (correction.getAction() != CorrectionRecord::NOTE_ONLY || !correction.getLecturerId().empty())
+            throw std::runtime_error("Use SystemStorage to preserve correction metadata.");
         const std::string fields[] = {
             correction.getStudentId(),
             correction.getSessionId(),

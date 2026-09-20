@@ -160,3 +160,29 @@ const Timetable& Student::getTimetable() const
 {
     return timetable;
 }
+void Student::markCourseCompleted(Course& course)
+{
+    if (!hasCompletedCourse(course))
+    {
+        completedCourses.push_back(&course);
+    }
+}
+bool Student::hasCompletedCourse(const Course& course) const
+{
+    for (const Course* completed : completedCourses)
+    {
+        if (completed == &course)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+const std::vector<Course*>& Student::getCompletedCourses() const
+{
+    return completedCourses;
+}
+
+#include "UniversityConsole.h"
+void Student::displayMenu(UniversityConsole& console) { console.studentMenu(*this); }

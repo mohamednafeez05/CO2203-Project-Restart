@@ -41,3 +41,12 @@ AttendanceRecord::AttendanceRecord(std::string studentId,
       checkInTime(recordedTime)
 {
 }
+#include <stdexcept>
+AttendanceRecord::AttendanceRecord(std::string student, std::string session, std::time_t at, std::string state, std::string source)
+    : status(state), method(source), studentId(student), sessionId(session), checkInTime(at)
+{
+    if ((state != "present" && state != "late") || source.empty() || at <= 0)
+        throw std::invalid_argument("Invalid attendance metadata.");
+}
+std::string AttendanceRecord::getStatus() const { return status; }
+std::string AttendanceRecord::getMethod() const { return method; }

@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+class UniversityConsole;
+
 class Person
 {
 private:
@@ -20,6 +22,8 @@ public:
 
     // Requires each role to provide its menu.
     virtual void displayMenu() = 0;
+    virtual void displayMenu(UniversityConsole& console) = 0;
+    void updateIdentity(const std::string& name, const std::string& credential);
 
     friend std::ostream& operator<<(std::ostream& os, const Person& p);
 

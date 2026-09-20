@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <ostream>
 
 #include "AttendanceRecord.h"
 #include "CorrectionRecord.h"
@@ -10,10 +11,13 @@
 
 class Student;
 class Course;
+class Lecturer;
+class AttendanceCapture;
 
 class AttendanceRegister
 {
 private:
+    friend class SystemStorage;
     std::vector<AttendanceRecord> records;
 
     std::vector<CorrectionRecord> corrections;
@@ -24,6 +28,11 @@ private:
     ) const;
 
 public:
+    bool isPresent(const std::string& studentId, const std::string& sessionId) const;
+    void markCaptured(Student& student, Course& course, AttendanceSession& session, const std::string& method);
+    void correct(Student& student, Course& course, AttendanceSession& session, Lecturer& actor, const std::string& reason, bool present);
+    void capture(AttendanceCapture& source, Course& course, AttendanceSession& session, const std::string& method, std::ostream& output);
+
     AttendanceRegister();
 
     // Saves both collections to separate files.

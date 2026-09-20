@@ -8,6 +8,8 @@ class AttendanceSession;
 class AttendanceCapture
 {
 public:
+    virtual bool acceptToken(const std::string&) { return false; }
+    virtual std::string token() const { return ""; }
     virtual void beginSession(
         AttendanceSession& session
     ) = 0;

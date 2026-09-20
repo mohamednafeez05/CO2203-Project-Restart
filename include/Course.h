@@ -14,6 +14,7 @@ class Course
 {
 
 private:
+    std::vector<double> assessmentScores;
     std::string courseCode;
     std::string title;
     int creditValue;
@@ -24,6 +25,12 @@ private:
     std::vector<TimeSlot> slots;
 
 public:
+    void setLecturer(Lecturer& lecturer);
+    void addPrerequisite(Course& course);
+    void updateDetails(const std::string& title, int credits, int limit);
+    void setScores(const std::vector<double>& scores);
+    const std::vector<double>& getScores() const;
+
     // Initialises course details and capacity.
     Course(const std::string& code, const std::string& title,
         int credits, int capacity);

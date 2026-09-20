@@ -1,3 +1,10 @@
+#include "Lecturer.h"
+#include "AttendanceCapture.h"
+#include "SessionClosedException.h"
+#include "NotEnrolledException.h"
+#include "DuplicateAttendanceException.h"
+#include <algorithm>
+#include <set>
 #include "AttendanceRegister.h"
 #include "Student.h"
 #include "Course.h"
@@ -25,43 +32,69 @@ bool AttendanceRegister::alreadyMarked(
     return false;
 }
 
-void AttendanceRegister::markPresent(
-    Student& student,
-    Course& course,
-    AttendanceSession& session)
+void AttendanceRegister::markPresent(Student& student, Course& course, AttendanceSession& session)
+{ markCaptured(student, course, session, "legacy"); }
+
+void AttendanceRegister::markCaptured(Student& student, Course& course, AttendanceSession& session, const std::string& method)
 {
-    if (session.isOpen() == false)
+    if (!session.isOpen()) throw SessionClosedException();
+    if (!course.isStudentEnrolled(student)) throw NotEnrolledException();
+    bool matches = false;
+    for (const TimeSlot& slot : course.getSlots()) if (&slot == session.getTimeSlot()) matches = true;
+    if (!matches) throw std::invalid_argument("Session slot does not belong to this course.");
+    if (alreadyMarked(student.getPersonId(), session.getSessionId()) || isPresent(student.getPersonId(), session.getSessionId()))
+        throw DuplicateAttendanceException();
+    const auto now = std::time(nullptr);
+    records.emplace_back(student.getPersonId(), session.getSessionId(), now,
+                         now - session.getStartTime() > 300 ? "late" : "present", method);
+}
+
+bool AttendanceRegister::isPresent(const std::string& studentId, const std::string& sessionId) const
+{
+    bool present = alreadyMarked(studentId, sessionId);
+    for (const auto& note : corrections)
+        if (note.getStudentId() == studentId && note.getSessionId() == sessionId && note.getAction() != CorrectionRecord::NOTE_ONLY)
+            present = note.getAction() == CorrectionRecord::MARKED_PRESENT;
+    return present;
+}
+
+void AttendanceRegister::correct(Student& student, Course& course, AttendanceSession& session, Lecturer& actor, const std::string& reason, bool present)
+{
+    if (course.getLecturer() != &actor) throw std::logic_error("Lecturer does not own this course.");
+    if (session.getCourseCode() != course.getCourseCode()) throw std::logic_error("Wrong session course.");
+    const auto& roster = session.getRoster();
+    if (std::find(roster.begin(), roster.end(), student.getPersonId()) == roster.end()) throw NotEnrolledException();
+    if (isPresent(student.getPersonId(), session.getSessionId()) == present)
+        throw std::logic_error("Correction would not change attendance.");
+    corrections.emplace_back(student.getPersonId(), session.getSessionId(), actor.getPersonId(), reason,
+        present ? CorrectionRecord::MARKED_PRESENT : CorrectionRecord::REMOVED_PRESENT);
+}
+
+// The capture loop depends only on the abstract interface.
+void AttendanceRegister::capture(AttendanceCapture& source, Course& course, AttendanceSession& session, const std::string& method, std::ostream& output)
+{
+    if (!session.isOpen()) throw SessionClosedException();
+    source.beginSession(session);
+    try
     {
-        throw std::runtime_error(
-            "Attendance session is closed."
-        );
+        std::string id;
+        while (source.captureNext(id))
+        {
+            Student* student = nullptr;
+            for (auto* item : course.getEnrolledStudents()) if (item->getPersonId() == id) student = item;
+            try
+            {
+                if (!student) throw NotEnrolledException();
+                const auto& roster = session.getRoster();
+                if (!roster.empty() && std::find(roster.begin(), roster.end(), id) == roster.end()) throw NotEnrolledException();
+                markCaptured(*student, course, session, method);
+                output << "Recorded: " << id << '\n';
+            }
+            catch (const std::exception& error) { output << "Rejected " << id << ": " << error.what() << '\n'; }
+        }
     }
-
-    if (course.isStudentEnrolled(student) == false)
-    {
-        throw std::runtime_error(
-            "Student is not enrolled in this course."
-        );
-    }
-
-    std::string studentId =
-        student.getPersonId();
-
-    if (alreadyMarked(
-            studentId,
-            session.getSessionId()))
-    {
-        throw std::runtime_error(
-            "Duplicate attendance is not allowed."
-        );
-    }
-
-    AttendanceRecord record(
-        studentId,
-        session.getSessionId()
-    );
-
-    records.push_back(record);
+    catch (...) { source.endSession(); throw; }
+    source.endSession();
 }
 
 void AttendanceRegister::addCorrection(
@@ -81,17 +114,11 @@ void AttendanceRegister::addCorrection(
 int AttendanceRegister::getPresentCount(
     std::string studentId) const
 {
+    std::set<std::string> ids;
+    for (const auto& record : records) if (record.getStudentId() == studentId) ids.insert(record.getSessionId());
+    for (const auto& note : corrections) if (note.getStudentId() == studentId) ids.insert(note.getSessionId());
     int count = 0;
-
-    for (std::size_t i = 0; i < records.size(); i++)
-    {
-        if (records[i].getStudentId()
-            == studentId)
-        {
-            count++;
-        }
-    }
-
+    for (const auto& id : ids) if (isPresent(studentId, id)) ++count;
     return count;
 }
 

@@ -7,11 +7,16 @@
 class AttendanceRecord
 {
 private:
+    std::string status = "present";
+    std::string method = "legacy";
     std::string studentId;
     std::string sessionId;
     std::time_t checkInTime;
 
 public:
+    AttendanceRecord(std::string student, std::string session, std::time_t at, std::string status, std::string method);
+    std::string getStatus() const;
+    std::string getMethod() const;
     AttendanceRecord();
 
     AttendanceRecord(

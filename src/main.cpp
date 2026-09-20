@@ -1,32 +1,20 @@
-#include "AttendanceConsole.h"
-
-#include <exception>
+#include "UniversityConsole.h"
+#include <filesystem>
 #include <iostream>
-#include <string>
-
 int main(int argc, char* argv[])
 {
-    if (argc > 2)
-    {
-        std::cerr << "Usage: mainApp.exe [data-directory]\n";
-        return 1;
-    }
-
     try
     {
-        const std::string directory =
-            argc == 2 ? argv[1] : "data";
-
-        AttendanceConsole app(directory);
-        app.run();
+        if (argc == 3 && std::string(argv[1]) == "--init-demo")
+        {
+            if (std::filesystem::exists(argv[2])) throw std::runtime_error("Demo destination must be a new folder.");
+            UniversitySystem system; system.initialiseDemo(); system.save(argv[2]);
+            std::cout << "Demo created. Run with that folder as the argument.\n"; return 0;
+        }
+        UniversityConsole console(argc > 1 ? argv[1] : "data"); console.run();
     }
     catch (const std::exception& error)
     {
-        std::cerr << "Application stopped: "
-                  << error.what() << '\n';
-
-        return 1;
+        std::cerr << error.what() << '\n'; return 1;
     }
-
-    return 0;
 }

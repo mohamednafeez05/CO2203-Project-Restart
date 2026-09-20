@@ -1,0 +1,21 @@
+UNIVERSITY_V1
+USER 3 "A001" "Demo Administrator" "admin123" 1 "Administration"
+USER 2 "L001" "Demo Lecturer" "lecturer123" 1 "Computing"
+USER 2 "L002" "Other Lecturer" "lecturer123" 1 "Computing"
+USER 1 "S001" "Nafeez" "student123" 2 "Computer Engineering"
+USER 1 "S002" "Demo Student" "student123" 2 "Computer Engineering"
+COURSE 1 "C101" "Programming Fundamentals" 3 30
+SLOT "C101" "Monday" 540 600 "Room A"
+ASSIGN "C101" "L001"
+SCORES "C101" 0
+COURSE 2 "C201" "Programming Lab" 1 1
+SLOT "C201" "Tuesday" 600 660 "Lab B"
+ASSIGN "C201" "L001"
+PREREQ "C201" "C101"
+SCORES "C201" 0
+COURSE 3 "C301" "Software Project" 3 20
+SLOT "C301" "Monday" 570 630 "Room C"
+ASSIGN "C301" "L001"
+SCORES "C301" 0
+COMPLETE "S001" "C101"
+END

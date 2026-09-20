@@ -24,6 +24,7 @@ public:
              void addAssignedCourse(Course& course);
             bool isAssignedTo(const Course& course) const;
 
+    void removeAssignedCourse(Course& course);
     void viewEnrolmentList(Course& course);
 
     AttendanceSession openAttendanceSession(
@@ -32,6 +33,7 @@ public:
         int durationMins);
 
     void displayMenu() override;
+    void displayMenu(UniversityConsole& console) override;
 
     std::string getDepartment() const;
 

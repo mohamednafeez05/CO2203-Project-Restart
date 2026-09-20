@@ -1,26 +1,92 @@
-# CO2203-Project-Restart
+# Logic Foundry - CO2203 integration candidate
 
-## Build and run on Windows
+University Course Registration, Timetable and Attendance Management System.
+C++17 console application, prepared 20 September 2026 from the three uploaded branches.
 
-Requirements: Git, a C++17 compiler, and GNU Make.
+## Before submission
 
-From the project root:
+1. Run the Windows test command below in a NEW extracted folder.
+2. Review `docs/PROJECT_REPORT.pdf`, especially the AI-use declaration and limitations.
+3. All three members must verify the contribution table and add their own signatures.
+4. Rehearse `docs/DEMO_GUIDE.md`. Submit one ZIP containing this project folder.
+
+This is an AI-assisted integration candidate, not an assertion of assessed completeness or original human authorship. Section 10 of the specification prohibits submitting substantially AI-generated code as one's own. Review the extent of permitted assistance with module staff. A disclosure does not override that rule.
+
+## Windows build and tests
+
+Install/use your existing MSYS2 g++ on PATH. From this folder in PowerShell:
 
 ```powershell
-mingw32-make
-.\mainApp.exe
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test.ps1
+.\mainApp.exe .\examples\demo
 ```
 
-## Project folders
+The test runner compiles each shared source once and links eight independent suites. It uses a fresh temporary test directory; it does not change the demonstration dataset. Expected final line: `Application build and all eight test suites passed.`
 
-- include/ — C++ header files.
-- src/ — C++ source files.
-- data/ — Saved application data.
-- docs/ — Project documentation.
+For a source-only build with GNU make: `mingw32-make` (or `make` in MSYS2).
 
-## Current progress
+## Linux build and tests
 
-- Repository constructor, add() and getAll() implemented.
-- Repository tested with integers and strings.
-- Makefile build tested successfully.
-- File saving and loading are not implemented yet.
+```bash
+make
+bash scripts/Test.sh
+./mainApp.exe examples/demo
+```
+
+`mainApp.exe` is the chosen target name on both platforms; build it locally. No executable is included in the submission archive.
+
+## Demonstration credentials
+
+| Role | ID | Password |
+|---|---|---|
+| Administrator | A001 | admin123 |
+| Lecturer, owns demo courses | L001 | lecturer123 |
+| Lecturer, owns no courses | L002 | lecturer123 |
+| Student | S001 | student123 |
+| Student | S002 | student123 |
+
+These are artificial demonstration credentials. The inherited `passwordHash` field currently stores a directly compared credential; it is NOT a secure password hash. Do not put real passwords or real personal data in these files.
+
+For a populated report/audit example, run `mainApp.exe examples/completed-demo` and use the same logins. It contains two closed sessions, original attendance and corrections from the integration test.
+
+To reset, create a NEW directory:
+
+```powershell
+.\mainApp.exe --init-demo .\demo-fresh
+.\mainApp.exe .\demo-fresh
+```
+
+Initialization refuses an existing directory. The main application expects `<folder>/system.txt`. Changes are saved after successful mutation and on logout. Failed saves retain pending in-memory changes; fix the path problem and retry saving before closing.
+
+## File formats and migration
+
+The main application's `SystemStorage` owns a single `UNIVERSITY_V1` snapshot containing all three user roles, all three course types, scores, slots, prerequisites, completions, enrolments, assignments, session times/rosters, immutable original records and append-only corrections. `END` detects truncation. `SafeFile` stages `.tmp`, backs up `.bak`, and replaces the snapshot.
+
+Load rebuilds and validates a temporary object graph before swapping it into live state. Session times are preserved, but sessions restart CLOSED and codes are discarded. Open a new session after restart; this avoids reviving expired credentials.
+
+The older `FileStorage`, `CourseStorage`, `StudentHistoryStore` and `AttendanceConsole` remain for historical compatibility tests. Their separate V1/V2/V3 datasets are NOT automatically migrated to the new role-aware snapshot. They reject new metadata they cannot preserve. Keep your existing data folders as backups; use the supplied demo for the integrated application.
+
+## Key rules
+
+- Student actions use the authenticated student; an ID cannot impersonate another student.
+- Lecturer session, capture, correction and audit actions require current course ownership.
+- A session snapshots its eligible roster at opening. Students enrolled later join the next session.
+- Counts apply the latest correction without deleting original records. Reports use sessions whose opening roster includes the student; course percentages weight eligible student/session pairs. Opened sessions count immediately; zero eligible sessions display N/A.
+- `TimeSlot::operator==` means overlap, not exact identity. Minutes are measured after midnight; weekdays normalize full names and three-letter abbreviations.
+- Adding slots after enrolment or session history is blocked to preserve referenced slot addresses.
+- Removing referenced users/courses is blocked rather than erasing historical relationships.
+- Replay expects one student ID per nonblank line. Unknown/unregistered IDs and duplicates are rejected individually. A malformed line stops that replay, closes the session, and preserves earlier accepted events.
+- Rotating codes expire after 60 seconds. After expiry, lecturer menu 5 -> Rotating code creates a new code while the session remains open. Use one running process: log out of the lecturer menu, sign in as student, and enter the code there.
+- Course grade calculations demonstrate course-type polymorphism; these are course-level example scores, not a per-student gradebook.
+
+## Package contents
+
+`include/`, `src/`: code; `tests/`, `scripts/`, `Makefile`: build/tests.
+`examples/`: artificial sample data and replay files.
+`docs/PROJECT_REPORT.pdf`: eight-page report with signature spaces.
+`docs/FINAL_UML.pdf` and `docs/FINAL_UML.drawio`: readable diagram and editable source.
+`docs/DESIGN_CHANGE_LOG.md`: final dated changes and baseline deviations.
+`docs/TEST_RESULTS.txt`: actual local test output.
+`docs/DEMO_GUIDE.md`: concise demo sequence.
+
+The Linux build/tests were run here. Windows verification must be performed on the team's machine. Do not claim a Windows pass until the supplied command succeeds.

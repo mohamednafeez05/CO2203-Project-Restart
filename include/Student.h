@@ -11,11 +11,16 @@ class Course;
 class Student : public Person
 {
     private:
+        std::vector<Course*> completedCourses;
         int yearOfStudy;
         std::string major;
         std::vector<Course*> enrolledCourses;
         Timetable timetable;
 public:
+    void markCourseCompleted(Course& course);
+    bool hasCompletedCourse(const Course& course) const;
+    const std::vector<Course*>& getCompletedCourses() const;
+
     // Initialises personal and academic details.
     Student(const std::string& id, const std::string& name,
             const std::string& storedHash, int year,
@@ -27,6 +32,7 @@ public:
 
     // Displays the student menu.
     void displayMenu() override;
+    void displayMenu(UniversityConsole& console) override;
 
     // Returns the student's year.
     int getYearOfStudy() const;

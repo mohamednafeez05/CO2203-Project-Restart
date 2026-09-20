@@ -2,88 +2,139 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <ctime>
+#include <random>
 
-RotatingCodeCapture::RotatingCodeCapture()
+// A random 4-digit code, 1000 to 9999.
+static int randomFourDigitCode()
 {
-    currentSession = 0;
-    currentCode = "";
-    active = false;
+    static std::mt19937 engine(std::random_device{}());
+    std::uniform_int_distribution<int> dist(1000, 9999);
+    return dist(engine);
+}
+
+RotatingCodeCapture::RotatingCodeCapture(int lifetime)
+    : currentSession(nullptr),
+      currentCode(""),
+      codeExpiry(0),
+      codeLifetimeSeconds(lifetime > 0 ? lifetime
+                                       : defaultCodeLifetimeSeconds),
+      active(false)
+{
 }
 
 void RotatingCodeCapture::beginSession(
     AttendanceSession& session)
 {
+    // End any previous capture before starting a new one.
+    if (active)
+    {
+        endSession();
+    }
+
     currentSession = &session;
 
-    if (currentSession->isOpen() == false)
+    if (!currentSession->isOpen())
     {
         currentSession->open();
     }
 
     active = true;
-
-    generateCode();
+    regenerateCode();
 }
 
-void RotatingCodeCapture::generateCode()
+void RotatingCodeCapture::regenerateCode()
 {
-    int code;
-
-    code = 1000 + rand() % 9000;
-
-    currentCode =
-        std::to_string(code);
+    const std::string previous = currentCode;
+    do { currentCode = std::to_string(randomFourDigitCode()); } while (currentCode == previous);
+    codeExpiry = std::time(nullptr) + codeLifetimeSeconds;
 }
 
-std::string
-RotatingCodeCapture::getCurrentCode() const
+std::string RotatingCodeCapture::getCurrentCode() const
 {
     return currentCode;
 }
 
-bool RotatingCodeCapture::validateCode(
-    std::string enteredCode) const
+bool RotatingCodeCapture::isCodeExpired() const
 {
-    if (enteredCode == currentCode)
+    return std::time(nullptr) >= codeExpiry;
+}
+
+bool RotatingCodeCapture::validateCode(
+    const std::string& enteredCode) const
+{
+    if (currentCode.empty() || isCodeExpired())
     {
-        return true;
+        return false;
     }
 
-    return false;
+    return enteredCode == currentCode;
+}
+
+bool RotatingCodeCapture::submitCode(
+    const std::string& enteredCode)
+{
+    if (!active ||
+        currentSession == nullptr ||
+        !currentSession->isOpen())
+    {
+        return false;
+    }
+
+    if (!validateCode(enteredCode))
+    {
+        return false;
+    }
+
+    // A used code is thrown away, so it cannot be shared.
+    regenerateCode();
+    return true;
 }
 
 bool RotatingCodeCapture::captureNext(
     std::string& studentId)
 {
-    if (active == false)
+    while (active &&
+           currentSession != nullptr &&
+           currentSession->isOpen())
     {
-        return false;
-    }
+        std::string enteredCode;
 
-    if (currentSession == 0)
-    {
-        return false;
-    }
+        std::cout << "Student ID (or END to finish): ";
 
-    if (currentSession->isOpen() == false)
-    {
-        return false;
-    }
+        if (!(std::cin >> studentId))
+        {
+            return false;   // input closed
+        }
 
-    std::string enteredCode;
+        if (studentId == "END")
+        {
+            return false;
+        }
 
-    std::cout << "Student ID: ";
-    std::cin >> studentId;
+        std::cout << "Attendance code: ";
 
-    std::cout << "Attendance code: ";
-    std::cin >> enteredCode;
+        if (!(std::cin >> enteredCode))
+        {
+            return false;   // input closed
+        }
 
-    if (validateCode(enteredCode))
-    {
-        generateCode();
+        if (submitCode(enteredCode))
+        {
+            return true;
+        }
 
-        return true;
+        // Wrong or expired code: tell the student and ask again,
+        // instead of silently ending the whole session.
+        if (isCodeExpired())
+        {
+            regenerateCode();
+            std::cout << "That code expired. "
+                         "Ask the lecturer for the new code.\n";
+        }
+        else
+        {
+            std::cout << "Incorrect code. Try again.\n";
+        }
     }
 
     return false;
@@ -93,10 +144,12 @@ void RotatingCodeCapture::endSession()
 {
     active = false;
 
-    if (currentSession != 0)
+    if (currentSession != nullptr)
     {
         currentSession->close();
     }
 
-    currentSession = 0;
+    currentSession = nullptr;
+    currentCode.clear();
+    codeExpiry = 0;
 }

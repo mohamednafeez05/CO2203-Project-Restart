@@ -3,6 +3,7 @@
 #include "Student.h"
 
 #include <ctime>
+#include <algorithm>
 #include <stdexcept>
 
 Lecturer::Lecturer(const std::string& id,
@@ -21,6 +22,7 @@ Lecturer::Lecturer(const std::string& id,
 
 void Lecturer::displayMenu()
 {
+    std::cout << "Lecturer dashboard: sign in through UniversityConsole.\n";
 }
 
 void Lecturer::viewEnrolmentList(Course& course)
@@ -62,7 +64,7 @@ const std::vector<Course*>& Lecturer::getAssignedCourses() const
 }
 void Lecturer::addAssignedCourse(Course& course)
 {
-    assignedCourses.push_back(&course);
+    if (!isAssignedTo(course)) assignedCourses.push_back(&course);
 }
 
 bool Lecturer::isAssignedTo(const Course& course) const
@@ -127,3 +129,10 @@ AttendanceSession Lecturer::openAttendanceSession(
 
     return session;
 }
+void Lecturer::removeAssignedCourse(Course& course)
+{
+    assignedCourses.erase(std::remove(assignedCourses.begin(), assignedCourses.end(), &course), assignedCourses.end());
+}
+
+#include "UniversityConsole.h"
+void Lecturer::displayMenu(UniversityConsole& console) { console.lecturerMenu(*this); }
