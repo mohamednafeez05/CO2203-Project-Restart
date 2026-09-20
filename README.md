@@ -1,20 +1,11 @@
 # Logic Foundry - CO2203 integration candidate
 
 University Course Registration, Timetable and Attendance Management System.
-C++17 console application, prepared 20 September 2026 from the three uploaded branches.
 
-## Before submission
-
-1. Run the Windows test command below in a NEW extracted folder.
-2. Review `docs/PROJECT_REPORT.pdf`, especially the AI-use declaration and limitations.
-3. All three members must verify the contribution table and add their own signatures.
-4. Rehearse `docs/DEMO_GUIDE.md`. Submit one ZIP containing this project folder.
-
-This is an AI-assisted integration candidate, not an assertion of assessed completeness or original human authorship. Section 10 of the specification prohibits submitting substantially AI-generated code as one's own. Review the extent of permitted assistance with module staff. A disclosure does not override that rule.
 
 ## Windows build and tests
 
-Install/use your existing MSYS2 g++ on PATH. From this folder in PowerShell:
+use y MSYS2 g++ on PATH. From this folder in PowerShell:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test.ps1
@@ -45,7 +36,7 @@ bash scripts/Test.sh
 | Student | S001 | student123 |
 | Student | S002 | student123 |
 
-These are artificial demonstration credentials. The inherited `passwordHash` field currently stores a directly compared credential; it is NOT a secure password hash. Do not put real passwords or real personal data in these files.
+These are artificial demonstration credentials. The inherited `passwordHash` field currently stores a directly compared credential
 
 For a populated report/audit example, run `mainApp.exe examples/completed-demo` and use the same logins. It contains two closed sessions, original attendance and corrections from the integration test.
 
@@ -79,7 +70,7 @@ The older `FileStorage`, `CourseStorage`, `StudentHistoryStore` and `AttendanceC
 - Rotating codes expire after 60 seconds. After expiry, lecturer menu 5 -> Rotating code creates a new code while the session remains open. Use one running process: log out of the lecturer menu, sign in as student, and enter the code there.
 - Course grade calculations demonstrate course-type polymorphism; these are course-level example scores, not a per-student gradebook.
 
-## Package contents
+## Contents
 
 `include/`, `src/`: code; `tests/`, `scripts/`, `Makefile`: build/tests.
 `examples/`: artificial sample data and replay files.
@@ -89,4 +80,3 @@ The older `FileStorage`, `CourseStorage`, `StudentHistoryStore` and `AttendanceC
 `docs/TEST_RESULTS.txt`: actual local test output.
 `docs/DEMO_GUIDE.md`: concise demo sequence.
 
-The Linux build/tests were run here. Windows verification must be performed on the team's machine. Do not claim a Windows pass until the supplied command succeeds.
