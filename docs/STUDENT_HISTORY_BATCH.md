@@ -30,9 +30,8 @@ and backup files are not used. LegacySmokeTest remains a separate earlier demo.
 
 Expected final output:
 
-```text
 Application build and all three test suites passed.
-```
+
 
 ## Interactive demonstration
 
@@ -67,7 +66,7 @@ Recover a consistent set of files manually after inspection. SafeFile attempts
 rollback on ordinary replacement errors; this is not atomic storage across
 multiple files, does not guarantee power-loss recovery and assumes one app instance.
 
-## Architecture / viva explanation
+## Architecture
 
 StudentHistoryStore owns three vectors. load builds temporary vectors, validates
 cross-file student IDs, then swaps all three into place. save encodes all three
@@ -76,18 +75,4 @@ to the store. Const getters prevent the viewer from changing collections directl
 findStudent returns a borrowed pointer; successful reload invalidates it.
 The viewer uses it only during immediate output and never retains it across reloads.
 
-## Verified scope and remaining work
 
-Tests cover repeat loads, restart, backups, unknown IDs, malformed files,
-missing files, leftover temporary files, backup-only directories, empty startup,
-failed-save preservation, profile/search/summary output, invalid input and EOF.
-
-Still pending: lecturer/admin integration and authentication, course/enrolment
-persistence and pointer ownership, session-to-course relationships and attendance
-percentages, full required attendance status/capture/audit metadata, team-wide
-integration and final submission checks. This batch does not complete FR5.1 or FR7.3.
-The existing two-file AttendanceRegister save/load API remains for compatibility;
-the new viewer saves through StudentHistoryStore.
-
-Progress is a planning estimate for Member 3, not a measured percentage of the
-whole project: previous estimate 67%, target about 77% after local acceptance.
