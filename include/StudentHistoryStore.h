@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "CourseStorage.h"
+#include <map>
 
 class AttendanceRegister;
 // Owns the collections used by the history viewer; exposes read-only access.
@@ -14,6 +15,7 @@ class StudentHistoryStore
 {
 private:
     CourseStorage::Courses courses;
+    std::map<std::string, std::string> sessionCourses;
     std::vector<Student> students;
     std::vector<AttendanceRecord> records;
     std::vector<CorrectionRecord> corrections;
@@ -22,6 +24,11 @@ private:
                               const std::vector<AttendanceRecord>& records,
                               const std::vector<CorrectionRecord>& corrections);
 public:
+    void linkSession(const std::string& sessionId,
+                    const std::string& courseCode);
+
+    const std::map<std::string, std::string>& getSessionCourses() const;
+
     std::vector<const Course*> getCourses() const;
     StudentHistoryStore() = default;
     StudentHistoryStore(const StudentHistoryStore&) = delete;

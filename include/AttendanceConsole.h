@@ -9,7 +9,7 @@ class AttendanceConsole
 private:
     StudentHistoryStore data;
     std::string dataDirectory;
-
+    void linkAttendanceSession();
     void importAttendanceBatch();
     void showRecords(const std::string& studentId) const;
     void showCorrections(const std::string& studentId) const;

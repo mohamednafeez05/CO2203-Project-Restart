@@ -7,9 +7,90 @@
 #include <fstream>
 #include "AttendanceRegister.h"
 #include <utility>
+#include <iomanip>
+#include <sstream>
 
 namespace
 {
+    // Validates links before loading or saving the complete dataset.
+    void validateSessionCourses(
+        const std::map<std::string, std::string>& links,
+        const CourseStorage::Courses& courses)
+    {
+        std::set<std::string> codes;
+
+        for (const auto& course : courses)
+            codes.insert(course->getCourseCode());
+
+        for (const auto& link : links)
+        {
+            if (link.first.find_first_not_of(" \t\r\n") ==
+                    std::string::npos ||
+                link.first.find_first_of("\r\n") != std::string::npos ||
+                codes.count(link.second) == 0)
+            {
+                throw std::runtime_error(
+                    "Invalid session ID or unknown course.");
+            }
+        }
+    }
+
+    std::map<std::string, std::string> readSessionCourses(
+        const std::filesystem::path& path)
+    {
+        std::ifstream input(path);
+        std::string line;
+
+        if (!std::getline(input, line))
+            throw std::runtime_error("Cannot read session-course file.");
+
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        if (line != "SESSION_COURSES_V1")
+            throw std::runtime_error("Invalid session-course file header.");
+
+        std::map<std::string, std::string> links;
+
+        while (std::getline(input, line))
+        {
+            std::istringstream row(line);
+            std::string sessionId, courseCode;
+
+            if (!(row >> std::quoted(sessionId) >> std::quoted(courseCode)))
+                throw std::runtime_error("Invalid session-course row.");
+
+            row >> std::ws;
+
+            if (!row.eof() ||
+                !links.emplace(sessionId, courseCode).second)
+            {
+                throw std::runtime_error(
+                    "Extra fields or duplicate session ID.");
+            }
+        }
+
+        if (input.bad())
+            throw std::runtime_error("Cannot read session-course file.");
+
+        return links;
+    }
+
+    std::string encodeSessionCourses(
+        const std::map<std::string, std::string>& links)
+    {
+        std::ostringstream output;
+        output << "SESSION_COURSES_V1\n";
+
+        for (const auto& link : links)
+        {
+            output << std::quoted(link.first) << ' '
+                << std::quoted(link.second) << '\n';
+        }
+
+        return output.str();
+    }
+
     // Recognise partial saves before accepting any dataset.
     bool checkFiles(const std::filesystem::path& folder)
     {
@@ -35,7 +116,8 @@ namespace
         if (present != 0 && present != 3)
             throw std::runtime_error("Incomplete dataset: students.txt, attendance.txt and corrections.txt are required together. Older history folders need a matching students.txt file.");
 
-        for (const char* name : {"course_enrolments.txt", "dataset.txt"})
+        for (const char* name : {
+             "course_enrolments.txt", "dataset.txt", "session_courses.txt"})
         {
             const auto path = folder / name;
 
@@ -65,9 +147,11 @@ namespace
             std::string version;
             marker >> version >> std::ws;
 
-            if (marker.bad() || !marker.eof() ||
-                version != "DATASET_V2" ||
-                !std::filesystem::exists(folder / "course_enrolments.txt"))
+        if (marker.bad() || !marker.eof() ||
+            (version != "DATASET_V2" && version != "DATASET_V3") ||
+            (version == "DATASET_V3" &&
+            !std::filesystem::exists(folder / "session_courses.txt")) ||
+            !std::filesystem::exists(folder / "course_enrolments.txt"))
             {
                 throw std::runtime_error(
                     "Invalid dataset marker or missing course file.");
@@ -98,6 +182,8 @@ void StudentHistoryStore::load(const std::string& directory)
 {
     const std::filesystem::path folder(directory);
 
+    std::map<std::string, std::string> loadedSessionCourses;
+
     CourseStorage::Courses loadedCourses;
     std::vector<Student> loadedStudents;
     std::vector<AttendanceRecord> loadedRecords;
@@ -122,9 +208,17 @@ void StudentHistoryStore::load(const std::string& directory)
                 registration.string(), loadedStudents, loadedCourses);
         }
 
-        validateLinks(loadedStudents, loadedRecords, loadedCorrections);
+    const auto sessionFile = folder / "session_courses.txt";
+
+    if (std::filesystem::exists(sessionFile))
+        loadedSessionCourses = readSessionCourses(sessionFile);
+
+    validateSessionCourses(loadedSessionCourses, loadedCourses);
+
+    validateLinks(loadedStudents, loadedRecords, loadedCorrections);
     }
 
+    sessionCourses.swap(loadedSessionCourses);
     // Replace live data only after the complete load succeeds.
     courses.swap(loadedCourses);
     students.swap(loadedStudents);
@@ -134,6 +228,7 @@ void StudentHistoryStore::load(const std::string& directory)
 
 void StudentHistoryStore::save(const std::string& directory) const
 {
+    validateSessionCourses(sessionCourses, courses);
     validateLinks(students, records, corrections);
 
     const auto courseText = CourseStorage::encode(students, courses);
@@ -146,7 +241,9 @@ void StudentHistoryStore::save(const std::string& directory) const
     std::filesystem::create_directories(folder);
 
     SafeFile::writeAll({
-        {(folder / "dataset.txt").string(), "DATASET_V2\n"},
+        {(folder / "dataset.txt").string(), "DATASET_V3\n"},
+        {(folder / "session_courses.txt").string(),
+        encodeSessionCourses(sessionCourses)},
         {(folder / "course_enrolments.txt").string(), courseText},
         {(folder / "students.txt").string(), studentText},
         {(folder / "attendance.txt").string(), attendanceText},
@@ -261,4 +358,28 @@ void StudentHistoryStore::importAttendance(
 
     records.swap(nextRecords);
     corrections.swap(nextCorrections);
+}
+// A session ID cannot be reassigned to a different course.
+void StudentHistoryStore::linkSession(
+    const std::string& sessionId,
+    const std::string& courseCode)
+{
+    auto proposed = sessionCourses;
+    const auto existing = proposed.find(sessionId);
+
+    if (existing != proposed.end() && existing->second != courseCode)
+    {
+        throw std::runtime_error(
+            "Session already belongs to another course.");
+    }
+
+    proposed[sessionId] = courseCode;
+    validateSessionCourses(proposed, courses);
+    sessionCourses.swap(proposed);
+}
+
+const std::map<std::string, std::string>&
+StudentHistoryStore::getSessionCourses() const
+{
+    return sessionCourses;
 }

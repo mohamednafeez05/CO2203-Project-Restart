@@ -156,10 +156,11 @@ void AttendanceConsole::run()
                   << "8. Drop a course\n"
                   << "9. View student timetable\n"
                   << "10. Import attendance batch\n"
+                  << "11. Link attendance session to course\n"
                   << "0. Save and exit\n";
 
         const int choice =
-            ConsoleInput::readInt("Choice: ", 0, 10);
+            ConsoleInput::readInt("Choice: ", 0, 11);
 
         switch (choice)
         {
@@ -210,6 +211,10 @@ void AttendanceConsole::run()
 
         case 10:
             importAttendanceBatch();
+            break;
+
+        case 11:
+            linkAttendanceSession();
             break;
 
         case 0:
@@ -343,5 +348,24 @@ void AttendanceConsole::importAttendanceBatch()
     catch (const std::exception& error)
     {
         std::cout << "Import failed: " << error.what() << '\n';
+    }
+}
+
+void AttendanceConsole::linkAttendanceSession()
+{
+    const std::string sessionId =
+        ConsoleInput::readText("Session ID: ");
+
+    const std::string courseCode =
+        ConsoleInput::readText("Course code: ");
+
+    try
+    {
+        data.linkSession(sessionId, courseCode);
+        std::cout << "Session linked. Choose 0 to save.\n";
+    }
+    catch (const std::exception& error)
+    {
+        std::cout << "Link failed: " << error.what() << '\n';
     }
 }
