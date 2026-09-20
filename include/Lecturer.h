@@ -2,7 +2,7 @@
 #define LECTURER_H
 
 #include "Person.h"
-#include "attendanceSession.h"
+#include "AttendanceSession.h"
 
 #include <string>
 #include <vector>
@@ -21,6 +21,8 @@ public:
              const std::string& name,
              const std::string& storedHash,
              const std::string& department);
+             void addAssignedCourse(Course& course);
+            bool isAssignedTo(const Course& course) const;
 
     void viewEnrolmentList(Course& course);
 

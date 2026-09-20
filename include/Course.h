@@ -30,6 +30,9 @@ public:
     bool isFull();
 
     bool prerequisitesMet(Student& student);
+    void setLecturer(Lecturer& lecturer);
+void addPrerequisite(Course& course);
+void addTimeSlot(const TimeSlot& slot);
 
     const std::vector<TimeSlot>& getSlots() const;
 

@@ -1,5 +1,6 @@
 #include "Course.h"
 #include "Student.h"
+#include "Lecturer.h"
 #include <algorithm>
 #include <stdexcept>
 
@@ -66,13 +67,23 @@ bool Course::isStudentEnrolled(const Student& student) const
 
 bool Course::prerequisitesMet(Student& student)
 {
-    /*
-        Temporary until the team decides how
-        completed prerequisite courses are represented.
+    for (Course* prerequisite : prerequisites)
+    {
+        if (prerequisite == nullptr)
+        {
+            continue;
+        }
 
-        Student currently stores enrolledCourses,
-        not completedCourses.
-    */
+        if (!student.hasCompletedCourse(*prerequisite))
+        {
+            return false;
+        }
+
+        if (!prerequisite->prerequisitesMet(student))
+        {
+            return false;
+        }
+    }
 
     return true;
 }
@@ -119,7 +130,21 @@ std::ostream& operator<<(std::ostream& os, Course& c)
 
     return os;
 }
+void Course::setLecturer(Lecturer& lecturer)
+{
+    this->lecturer = &lecturer;
+    lecturer.addAssignedCourse(*this);
+}
 
+void Course::addPrerequisite(Course& course)
+{
+    prerequisites.push_back(&course);
+}
+
+void Course::addTimeSlot(const TimeSlot& slot)
+{
+    slots.push_back(slot);
+}
 Course::~Course()
 {
 }

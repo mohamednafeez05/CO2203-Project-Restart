@@ -129,12 +129,20 @@ void Student::drop(Course& course)
         enrolledCourses.end(),
         &course);
 
-    if (it != enrolledCourses.end())
+    if (it == enrolledCourses.end())
     {
-        enrolledCourses.erase(it);
-        course.removeStudent(*this);
+        return;
     }
 
+    // Remove this course's slots from the student's timetable.
+    for (const TimeSlot& slot : course.getSlots())
+    {
+        timetable.removeTimeSlot(slot);
+    }
+
+    // Remove the relationship from both sides.
+    enrolledCourses.erase(it);
+    course.removeStudent(*this);
 }
 
 int Student::getYearOfStudy() const
@@ -146,7 +154,29 @@ std::string Student::getMajor() const
 {
     return major;
 }
+void Student::markCourseCompleted(Course& course)
+{
+    if (!hasCompletedCourse(course))
+    {
+        completedCourses.push_back(&course);
+    }
+}
+bool Student::hasCompletedCourse(const Course& course) const
+{
+    for (const Course* completed : completedCourses)
+    {
+        if (completed == &course)
+        {
+            return true;
+        }
+    }
 
+    return false;
+}
+const std::vector<Course*>& Student::getCompletedCourses() const
+{
+    return completedCourses;
+}
 const std::vector<Course*>& Student::getEnrolledCourses() const
 {
     return enrolledCourses;

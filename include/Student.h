@@ -15,13 +15,17 @@ private:
     std::string major;
     std::vector<Course*> enrolledCourses;
     Timetable timetable;
+    std::vector<Course*> completedCourses;
 
 public:
-    Student(const std::string& id,
-            const std::string& name,
-            const std::string& storedHash,
-            int year,
-            const std::string& major);
+                Student(const std::string& id,
+                const std::string& name,
+                const std::string& storedHash,
+                int year,
+                const std::string& major);
+                void markCourseCompleted(Course& course);
+                 bool hasCompletedCourse(const Course& course) const;
+                 const std::vector<Course*>& getCompletedCourses() const;
 
     void enrol(Course& course);
     void drop(Course& course);
