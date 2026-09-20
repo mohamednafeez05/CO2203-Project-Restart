@@ -1,31 +1,37 @@
 #include "FileReplayCapture.h"
 
 #include <stdexcept>
+#include <cctype>
 
 FileReplayCapture::FileReplayCapture(
     std::string fileName)
+    : fileName(fileName),
+      currentSession(nullptr),
+      active(false)
 {
-    this->fileName = fileName;
-
-    currentSession = 0;
-
-    active = false;
 }
 
 void FileReplayCapture::beginSession(
     AttendanceSession& session)
 {
+    // Make sure a previous replay is fully closed before starting again.
+    if (active || inputFile.is_open())
+    {
+        endSession();
+    }
+
     currentSession = &session;
 
-    if (currentSession->isOpen() == false)
+    if (!currentSession->isOpen())
     {
         currentSession->open();
     }
 
     inputFile.open(fileName.c_str());
 
-    if (inputFile.is_open() == false)
+    if (!inputFile.is_open())
     {
+        currentSession = nullptr;
         throw std::runtime_error(
             "Cannot open attendance replay file."
         );
@@ -37,34 +43,40 @@ void FileReplayCapture::beginSession(
 bool FileReplayCapture::captureNext(
     std::string& studentId)
 {
-    if (active == false)
+    if (!active || currentSession == nullptr)
     {
         return false;
     }
 
-    if (currentSession == 0)
+    if (!currentSession->isOpen())
     {
         return false;
     }
 
-    if (currentSession->isOpen() == false)
+    if (!std::getline(inputFile, studentId))
     {
         return false;
     }
 
-    if (std::getline(inputFile, studentId))
+    // A replay record must contain a non-whitespace student ID.
+    bool hasNonWhitespace = false;
+    for (char ch : studentId)
     {
-        if (studentId == "")
+        if (!std::isspace(static_cast<unsigned char>(ch)))
         {
-            throw std::runtime_error(
-                "Malformed attendance record."
-            );
+            hasNonWhitespace = true;
+            break;
         }
-
-        return true;
     }
 
-    return false;
+    if (!hasNonWhitespace)
+    {
+        throw std::runtime_error(
+            "Malformed attendance record."
+        );
+    }
+
+    return true;
 }
 
 void FileReplayCapture::endSession()
@@ -76,5 +88,10 @@ void FileReplayCapture::endSession()
 
     active = false;
 
-    currentSession = 0;
+    if (currentSession != nullptr)
+    {
+        currentSession->close();
+    }
+
+    currentSession = nullptr;
 }

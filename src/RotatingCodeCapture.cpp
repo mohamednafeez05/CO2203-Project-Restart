@@ -2,42 +2,41 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <ctime>
 
 RotatingCodeCapture::RotatingCodeCapture()
+    : currentSession(nullptr),
+      currentCode(""),
+      active(false)
 {
-    currentSession = 0;
-    currentCode = "";
-    active = false;
 }
 
 void RotatingCodeCapture::beginSession(
     AttendanceSession& session)
 {
+    // End any previous capture session before starting a new one.
+    if (active)
+    {
+        endSession();
+    }
+
     currentSession = &session;
 
-    if (currentSession->isOpen() == false)
+    if (!currentSession->isOpen())
     {
         currentSession->open();
     }
 
     active = true;
-
     generateCode();
 }
 
 void RotatingCodeCapture::generateCode()
 {
-    int code;
-
-    code = 1000 + rand() % 9000;
-
-    currentCode =
-        std::to_string(code);
+    const int code = 1000 + std::rand() % 9000;
+    currentCode = std::to_string(code);
 }
 
-std::string
-RotatingCodeCapture::getCurrentCode() const
+std::string RotatingCodeCapture::getCurrentCode() const
 {
     return currentCode;
 }
@@ -45,28 +44,18 @@ RotatingCodeCapture::getCurrentCode() const
 bool RotatingCodeCapture::validateCode(
     std::string enteredCode) const
 {
-    if (enteredCode == currentCode)
-    {
-        return true;
-    }
-
-    return false;
+    return enteredCode == currentCode;
 }
 
 bool RotatingCodeCapture::captureNext(
     std::string& studentId)
 {
-    if (active == false)
+    if (!active || currentSession == nullptr)
     {
         return false;
     }
 
-    if (currentSession == 0)
-    {
-        return false;
-    }
-
-    if (currentSession->isOpen() == false)
+    if (!currentSession->isOpen())
     {
         return false;
     }
@@ -79,24 +68,25 @@ bool RotatingCodeCapture::captureNext(
     std::cout << "Attendance code: ";
     std::cin >> enteredCode;
 
-    if (validateCode(enteredCode))
+    if (!validateCode(enteredCode))
     {
-        generateCode();
-
-        return true;
+        return false;
     }
 
-    return false;
+    // Rotate the code after a successful capture.
+    generateCode();
+    return true;
 }
 
 void RotatingCodeCapture::endSession()
 {
     active = false;
 
-    if (currentSession != 0)
+    if (currentSession != nullptr)
     {
         currentSession->close();
     }
 
-    currentSession = 0;
+    currentSession = nullptr;
+    currentCode.clear();
 }
