@@ -138,6 +138,7 @@ void Course::addTimeSlot(const TimeSlot& slot)
         if (existing == slot)
         {
             throw std::invalid_argument("Course time slots overlap.");
+
         }
     }
 
