@@ -1,82 +1,295 @@
-# Logic Foundry - CO2203 integration candidate
+# 🎓 University Course Registration, Timetable & Attendance Management System
 
-University Course Registration, Timetable and Attendance Management System.
+A console-based university management system developed in **C++** as part of the **CO2203 – Object Oriented Programming** module at the **University of Sri Jayewardenepura, Faculty of Engineering**.
 
+The project demonstrates the practical application of Object-Oriented Programming concepts through course registration, timetable management, attendance tracking, and persistent data storage.
 
-## Windows build and tests
+---
 
-use y MSYS2 g++ on PATH. From this folder in PowerShell:
+## 🚀 Key Features
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test.ps1
-.\mainApp.exe .\examples\demo
+### 👨‍🎓 Student
+- Login to the system
+- Enrol in courses
+- Drop courses
+- View personal timetable
+- Validate prerequisites
+- Check course capacity
+- Prevent timetable clashes
+- Participate in attendance sessions
+
+### 👨‍🏫 Lecturer
+- Login using lecturer account
+- View assigned courses
+- View enrolled students
+- Open and close attendance sessions
+- Record attendance
+- Use attendance capture mechanisms
+
+### 🛠️ Administrator
+- Manage user accounts
+- Manage course offerings
+- Create and update courses
+- Assign lecturers
+- Manage course capacities and prerequisites
+- Generate reports
+
+---
+
+## 🕒 Timetable Management
+
+The system maintains weekly course time slots and detects timetable clashes before allowing students to enrol.
+
+Clash detection is implemented using operator overloading as part of the OOP design.
+
+---
+
+## ✅ Attendance Management
+
+The attendance subsystem supports session-based attendance tracking.
+
+The project uses an abstract `AttendanceCapture` interface with multiple implementations:
+
+- `FileReplayCapture`
+- `RotatingCodeCapture`
+
+The active attendance capture method can be selected at runtime using polymorphism.
+
+---
+
+## 💾 Data Persistence
+
+System data is saved and restored between program executions using file handling.
+
+Persistence is handled through:
+
+- `Repository<T>`
+- `FileStorage`
+
+This keeps file operations separate from the main application logic.
+
+---
+
+## 🧠 Object-Oriented Programming Concepts Used
+
+- Encapsulation
+- Inheritance
+- Polymorphism
+- Abstract classes
+- Virtual functions
+- Virtual destructors
+- Composition
+- Aggregation
+- Operator overloading
+- Function overriding
+- Exception handling
+- Custom exception classes
+- Templates
+- STL containers
+- File handling
+- Const-correctness
+- Static members
+
+---
+
+## 🏗️ Main Class Hierarchies
+
+### Person Hierarchy
+
+```text
+Person
+├── Student
+├── Lecturer
+└── Administrator
 ```
 
-The test runner compiles each shared source once and links eight independent suites. It uses a fresh temporary test directory; it does not change the demonstration dataset. Expected final line: `Application build and all eight test suites passed.`
+Role-specific behaviour is implemented using virtual functions and runtime polymorphism.
 
-For a source-only build with GNU make: `mingw32-make` (or `make` in MSYS2).
 
-## Linux build and tests
+
+### Course Hierarchy
+Course
+
+```text
+├── LectureCourse
+├── LabCourse
+└── ProjectCourse
+```
+
+Different course types share common functionality while also implementing specialised behaviour.
+
+### Attendance Capture Hierarchy
+AttendanceCapture
+
+```text
+├── FileReplayCapture
+└── RotatingCodeCapture
+```
+
+This allows different attendance capture mechanisms to be used through the same abstract interface.
+
+## 🧩 Core Components
+
+Key components include:
+
+- `Person`, `Student`, `Lecturer`, `Administrator`
+- `Course`, `LectureCourse`, `LabCourse`, `ProjectCourse`
+- `TimeSlot` and `Timetable`
+- `AttendanceSession`, `AttendanceRecord`, `AttendanceRegister`
+- `AttendanceCapture`
+- `Repository<T>`
+- `FileStorage`
+
+---
+
+## 🗂️ System Architecture
+
+The system was designed using UML before implementation.
+
+```text
+User Interface
+      │
+      ▼
+Domain Model
+      │
+      ├── Person Hierarchy
+      ├── Course Hierarchy
+      ├── Enrolment
+      ├── Timetable
+      └── Attendance
+      │
+      ▼
+Persistence Layer
+      │
+      ├── Repository<T>
+      └── FileStorage
+      │
+      ▼
+Data Files
+```
+
+---
+
+## 🛠️ Technologies Used
+
+- **C++**
+- **C++17**
+- Object-Oriented Programming
+- STL
+- File Handling
+- UML
+- Git
+- GitHub
+- VS Code
+- MinGW / `g++`
+
+---
+
+## 👥 Team
+
+Developed as a **3-member university group project** by **Logic Foundry**.
+
+| Member | Main Responsibility |
+|---|---|
+| B.G.C.V. Wickramawardana | Domain Model |
+| M.L. Abdalla | Scheduling & Attendance Engine |
+| M.N.M. Nafeez | Persistence, UI & System Integration |
+
+---
+
+## 👨‍💻 My Contribution
+
+My primary responsibility was the **Persistence and UI layer**, together with system integration.
+
+My work included:
+
+- Working with `Repository<T>`
+- File storage and persistence integration
+- Connecting system modules through the menu/UI
+- Integrating components developed by team members
+- Git and GitHub repository management
+- Testing and debugging integrated functionality
+- Supporting final system integration and demonstration
+
+---
+
+## ▶️ Running the Project
+
+### Requirements
+
+You need:
+
+- A **C++17-compatible compiler**
+- `g++`
+- MinGW on Windows
+- Git
+
+### Clone the Repository
 
 ```bash
-make
-bash scripts/Test.sh
-./mainApp.exe examples/demo
+git clone https://github.com/mohamednafeez05/CO2203-Project-Restart.git
 ```
 
-`mainApp.exe` is the chosen target name on both platforms; build it locally. No executable is included in the submission archive.
+### Enter the Project Directory
 
-## Demonstration credentials
-
-| Role | ID | Password |
-|---|---|---|
-| Administrator | A001 | admin123 |
-| Lecturer, owns demo courses | L001 | lecturer123 |
-| Lecturer, owns no courses | L002 | lecturer123 |
-| Student | S001 | student123 |
-| Student | S002 | student123 |
-
-These are artificial demonstration credentials. The inherited `passwordHash` field currently stores a directly compared credential
-
-For a populated report/audit example, run `mainApp.exe examples/completed-demo` and use the same logins. It contains two closed sessions, original attendance and corrections from the integration test.
-
-To reset, create a NEW directory:
-
-```powershell
-.\mainApp.exe --init-demo .\demo-fresh
-.\mainApp.exe .\demo-fresh
+```bash
+cd CO2203-Project-Restart
 ```
 
-Initialization refuses an existing directory. The main application expects `<folder>/system.txt`. Changes are saved after successful mutation and on logout. Failed saves retain pending in-memory changes; fix the path problem and retry saving before closing.
+### Compile the Project
 
-## File formats and migration
+On Windows with MinGW:
 
-The main application's `SystemStorage` owns a single `UNIVERSITY_V1` snapshot containing all three user roles, all three course types, scores, slots, prerequisites, completions, enrolments, assignments, session times/rosters, immutable original records and append-only corrections. `END` detects truncation. `SafeFile` stages `.tmp`, backs up `.bak`, and replaces the snapshot.
+```bash
+mingw32-make
+```
 
-Load rebuilds and validates a temporary object graph before swapping it into live state. Session times are preserved, but sessions restart CLOSED and codes are discarded. Open a new session after restart; this avoids reviving expired credentials.
+Then run the generated executable.
 
-The older `FileStorage`, `CourseStorage`, `StudentHistoryStore` and `AttendanceConsole` remain for historical compatibility tests. Their separate V1/V2/V3 datasets are NOT automatically migrated to the new role-aware snapshot. They reject new metadata they cannot preserve. Keep your existing data folders as backups; use the supplied demo for the integrated application.
+> Build and execution commands may vary depending on the operating system and compiler setup.
 
-## Key rules
+---
 
-- Student actions use the authenticated student; an ID cannot impersonate another student.
-- Lecturer session, capture, correction and audit actions require current course ownership.
-- A session snapshots its eligible roster at opening. Students enrolled later join the next session.
-- Counts apply the latest correction without deleting original records. Reports use sessions whose opening roster includes the student; course percentages weight eligible student/session pairs. Opened sessions count immediately; zero eligible sessions display N/A.
-- `TimeSlot::operator==` means overlap, not exact identity. Minutes are measured after midnight; weekdays normalize full names and three-letter abbreviations.
-- Adding slots after enrolment or session history is blocked to preserve referenced slot addresses.
-- Removing referenced users/courses is blocked rather than erasing historical relationships.
-- Replay expects one student ID per nonblank line. Unknown/unregistered IDs and duplicates are rejected individually. A malformed line stops that replay, closes the session, and preserves earlier accepted events.
-- Rotating codes expire after 60 seconds. After expiry, lecturer menu 5 -> Rotating code creates a new code while the session remains open. Use one running process: log out of the lecturer menu, sign in as student, and enter the code there.
-- Course grade calculations demonstrate course-type polymorphism; these are course-level example scores, not a per-student gradebook.
+## 📚 What I Learned
 
-## Contents
+This project provided practical experience in:
 
-`include/`, `src/`: code; `tests/`, `scripts/`, `Makefile`: build/tests.
-`examples/`: artificial sample data and replay files.
-`docs/PROJECT_REPORT.pdf`: eight-page report with signature spaces.
-`docs/FINAL_UML.pdf` and `docs/FINAL_UML.drawio`: readable diagram and editable source.
-`docs/DESIGN_CHANGE_LOG.md`: final dated changes and baseline deviations.
-`docs/TEST_RESULTS.txt`: actual local test output.
-`docs/DEMO_GUIDE.md`: concise demo sequence.
+- Designing larger object-oriented applications
+- Translating UML designs into C++ implementations
+- Designing class relationships
+- Applying inheritance and polymorphism
+- Working with abstract interfaces
+- Managing persistent data
+- Integrating independently developed modules
+- Debugging cross-module issues
+- Using Git and GitHub collaboratively
+- Working as part of a software development team
 
+---
+
+## 🎯 Academic Context
+
+**Module:** CO2203 – Object Oriented Programming  
+**Language:** C++  
+**University:** University of Sri Jayewardenepura  
+**Faculty:** Faculty of Engineering  
+**Department:** Computer Engineering
+
+---
+
+## 📌 Project Status
+
+- ✅ Design completed
+- ✅ Implementation completed
+- ✅ Integration completed
+- ✅ Testing completed
+- ✅ Final demonstration completed
+
+---
+
+## 🔐 Demo Accounts
+
+The project supports Student, Lecturer, and Administrator login roles.
+
+For security and privacy, real credentials are not included in this public repository.
+Use the provided sample data or create test accounts locally for demonstration.
